@@ -29,7 +29,13 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 .color-dot input[type=color] { position: absolute; inset: -6px; opacity: 0; cursor: pointer; width: 150%; height: 150%; }
 .meters { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
 .meter-row { display: flex; align-items: center; gap: 6px; }
-.meter-label { font-size: 11px; font-weight: 600; color: #333; text-align: right; flex: 0 0 78px; line-height: 1.2; }
+.meter-hint { text-align: center; font-size: 11px; color: #aaa; margin-bottom: 10px; font-family: sans-serif; }
+.meter-hint button { background: none; border: 1px solid #ddd; border-radius: 6px; font-size: 11px; color: #888; cursor: pointer; padding: 2px 8px; font-family: sans-serif; }
+.meter-hint button:hover { background: #f5f5f5; color: #333; }
+.meter-label { font-size: 11px; font-weight: 600; color: #333; text-align: right; flex: 0 0 78px; line-height: 1.2; cursor: default; border-radius: 4px; padding: 1px 2px; }
+.meter-label.editing-active { outline: 1.5px dashed #bbb; background: #fafafa; cursor: text; }
+.meter-label input.label-input { width: 100%; font-size: 11px; font-weight: 600; color: #333; border: none; background: transparent; outline: none; font-family: Georgia, serif; text-align: right; padding: 0; }
+.meter-label.right input.label-input { text-align: left; }
 .meter-label.right { text-align: left; }
 .meter-track { flex: 1; position: relative; height: 20px; display: flex; align-items: center; }
 .meter-line { width: 100%; height: 2px; background: #ddd; border-radius: 2px; position: absolute; }
@@ -58,6 +64,7 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
         <input type="range" min="1" max="4" step="0.01" value="1" id="zoomA">
         <label>zoom & drag to crop</label>
       </div>
+      <div id="heartBadgeA" style="margin-top:2px"><?xml version="1.0"?><svg id="heartSvgA" viewBox="0 0 24 24" width="28" height="28" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#a8c97f" stroke="#1a1a1a" stroke-width="1.5"/></svg></div>
       <div class="color-picker-wrap export-hide">
         <div class="color-dot" id="dotA" style="background:#a8c97f">
           <input type="color" id="colorA" value="#a8c97f">
@@ -76,6 +83,7 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
         <input type="range" min="1" max="4" step="0.01" value="1" id="zoomB">
         <label>zoom & drag to crop</label>
       </div>
+      <div id="heartBadgeB" style="margin-top:2px"><svg id="heartSvgB" viewBox="0 0 24 24" width="28" height="28" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#5bc4f5" stroke="#1a1a1a" stroke-width="1.5"/></svg></div>
       <div class="color-picker-wrap export-hide">
         <div class="color-dot" id="dotB" style="background:#5bc4f5">
           <input type="color" id="colorB" value="#5bc4f5">
@@ -85,13 +93,14 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
     </div>
   </div>
   <div class="meters" id="metersContainer"></div>
+  <div class="meter-hint export-hide" id="editHint">double-tap any label to edit &nbsp;·&nbsp; <button id="resetBtn">reset labels</button></div>
   <button class="export-btn" id="exportBtn"><i class="ti ti-download" aria-hidden="true"></i> Export as PNG</button>
 </div>
 
 <script>
 const CANVAS_SIZE = 440;
 
-const traits = [
+const DEFAULT_TRAITS = [
   ["Cooks","Orders takeout"],
   ["Messy Sleeper","Flat Sleeper"],
   ["Cleans","Procastinates"],
@@ -102,11 +111,59 @@ const traits = [
   ['"Can you fix this for me?"',"Fixes things"],
 ];
 
+const traits = DEFAULT_TRAITS.map(p => [...p]);
+
 let colorA = "#a8c97f", colorB = "#5bc4f5";
 const positions = traits.map(() => ({ a: 0.35, b: 0.65 }));
 
 function heartSVG(color, size=20) {
   return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="${color}" stroke="#1a1a1a" stroke-width="1.5"/></svg>`;
+}
+
+function makeLabelEditable(el, rowIndex, side) {
+  // side: 0 = left, 1 = right
+  let tapTimer = null;
+  el.addEventListener('click', () => {
+    if (tapTimer) {
+      // double tap
+      clearTimeout(tapTimer);
+      tapTimer = null;
+      enterEdit(el, rowIndex, side);
+    } else {
+      tapTimer = setTimeout(() => { tapTimer = null; }, 300);
+    }
+  });
+  // also support dblclick on desktop
+  el.addEventListener('dblclick', () => {
+    enterEdit(el, rowIndex, side);
+  });
+}
+
+function enterEdit(el, rowIndex, side) {
+  if (el.classList.contains('editing-active')) return;
+  el.classList.add('editing-active');
+  const current = traits[rowIndex][side];
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'label-input';
+  input.value = current;
+  el.textContent = '';
+  el.appendChild(input);
+  input.focus();
+  input.select();
+
+  function save() {
+    const val = input.value.trim() || DEFAULT_TRAITS[rowIndex][side];
+    traits[rowIndex][side] = val;
+    el.classList.remove('editing-active');
+    el.textContent = val;
+    makeLabelEditable(el, rowIndex, side);
+  }
+  input.addEventListener('blur', save);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { input.blur(); }
+    if (e.key === 'Escape') { input.value = traits[rowIndex][side]; input.blur(); }
+  });
 }
 
 function buildMeters() {
@@ -116,20 +173,31 @@ function buildMeters() {
     const row = document.createElement('div');
     row.className = 'meter-row';
     row.innerHTML = `
-      <div class="meter-label">${pair[0]}</div>
+      <div class="meter-label" id="labelL${i}">${pair[0]}</div>
       <div class="meter-track" id="track${i}">
         <div class="meter-line"></div>
         <div class="heart-slider" id="hsA${i}" style="left:${positions[i].a*100}%">${heartSVG(colorA)}</div>
         <div class="heart-slider" id="hsB${i}" style="left:${positions[i].b*100}%">${heartSVG(colorB)}</div>
       </div>
-      <div class="meter-label right">${pair[1]}</div>`;
+      <div class="meter-label right" id="labelR${i}">${pair[1]}</div>`;
     container.appendChild(row);
   });
   traits.forEach((_, i) => {
+    makeLabelEditable(document.getElementById(`labelL${i}`), i, 0);
+    makeLabelEditable(document.getElementById(`labelR${i}`), i, 1);
     attachDrag(`hsA${i}`, `track${i}`, i, 'a');
     attachDrag(`hsB${i}`, `track${i}`, i, 'b');
   });
 }
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (!confirm('Reset all labels to default?')) return;
+  DEFAULT_TRAITS.forEach((pair, i) => {
+    traits[i][0] = pair[0];
+    traits[i][1] = pair[1];
+  });
+  buildMeters();
+});
 
 function attachDrag(sliderId, trackId, rowIndex, key) {
   const el = document.getElementById(sliderId);
@@ -174,11 +242,13 @@ function updateAllColors() {
 document.getElementById('colorA').addEventListener('input', e => {
   colorA = e.target.value;
   document.getElementById('dotA').style.background = colorA;
+  document.getElementById('heartSvgA').querySelector('path').setAttribute('fill', colorA);
   updateAllColors();
 });
 document.getElementById('colorB').addEventListener('input', e => {
   colorB = e.target.value;
   document.getElementById('dotB').style.background = colorB;
+  document.getElementById('heartSvgB').querySelector('path').setAttribute('fill', colorB);
   updateAllColors();
 });
 
