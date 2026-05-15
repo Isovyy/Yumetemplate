@@ -44,6 +44,9 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 .heart-slider svg { width: 20px; height: 20px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.18)); }
 .export-btn { display: block; width: 100%; padding: 11px; background: #2a2a2a; color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: 0.3px; margin-top: 4px; }
 .export-btn:active { opacity: 0.85; }
+.char-name { font-size: 13px; font-weight: 700; color: #2a2a2a; text-align: center; margin-top: 6px; cursor: default; border-radius: 4px; padding: 1px 4px; min-width: 60px; }
+.char-name.editing-active { outline: 1.5px dashed #bbb; background: #fafafa; cursor: text; }
+.char-name input.name-input { width: 100%; font-size: 13px; font-weight: 700; color: #2a2a2a; border: none; background: transparent; outline: none; font-family: Georgia, serif; text-align: center; padding: 0; }
 .zoom-controls { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .zoom-controls label { font-size: 9px; color: #aaa; }
 .zoom-controls input[type=range] { width: 80px; }
@@ -64,6 +67,7 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
         <input type="range" min="1" max="4" step="0.01" value="1" id="zoomA">
         <label>zoom & drag to crop</label>
       </div>
+      <div class="char-name" id="nameA" title="double-tap to edit">Person A</div>
       <div id="heartBadgeA" style="margin-top:2px"><?xml version="1.0"?><svg id="heartSvgA" viewBox="0 0 24 24" width="28" height="28" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#a8c97f" stroke="#1a1a1a" stroke-width="1.5"/></svg></div>
       <div class="color-picker-wrap export-hide">
         <div class="color-dot" id="dotA" style="background:#a8c97f">
@@ -83,6 +87,7 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
         <input type="range" min="1" max="4" step="0.01" value="1" id="zoomB">
         <label>zoom & drag to crop</label>
       </div>
+      <div class="char-name" id="nameB" title="double-tap to edit">Person B</div>
       <div id="heartBadgeB" style="margin-top:2px"><svg id="heartSvgB" viewBox="0 0 24 24" width="28" height="28" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#5bc4f5" stroke="#1a1a1a" stroke-width="1.5"/></svg></div>
       <div class="color-picker-wrap export-hide">
         <div class="color-dot" id="dotB" style="background:#5bc4f5">
@@ -198,6 +203,41 @@ document.getElementById('resetBtn').addEventListener('click', () => {
   });
   buildMeters();
 });
+
+function makeNameEditable(el, defaultName) {
+  let tapTimer = null;
+  function activate() {
+    if (el.classList.contains('editing-active')) return;
+    el.classList.add('editing-active');
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'name-input';
+    input.value = el.dataset.value || defaultName;
+    el.textContent = '';
+    el.appendChild(input);
+    input.focus(); input.select();
+    function save() {
+      const val = input.value.trim() || defaultName;
+      el.dataset.value = val;
+      el.classList.remove('editing-active');
+      el.textContent = val;
+      makeNameEditable(el, defaultName);
+    }
+    input.addEventListener('blur', save);
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') input.blur();
+      if (e.key === 'Escape') { input.value = el.dataset.value || defaultName; input.blur(); }
+    });
+  }
+  el.addEventListener('click', () => {
+    if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; activate(); }
+    else { tapTimer = setTimeout(() => { tapTimer = null; }, 300); }
+  });
+  el.addEventListener('dblclick', activate);
+}
+
+makeNameEditable(document.getElementById('nameA'), 'Person A');
+makeNameEditable(document.getElementById('nameB'), 'Person B');
 
 function attachDrag(sliderId, trackId, rowIndex, key) {
   const el = document.getElementById(sliderId);
