@@ -10,7 +10,9 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: center; padding: 20px; font-family: Georgia, serif; }
 #card { background: white; border-radius: 20px; border: 1.5px solid #f0e0d0; padding: 16px 14px 20px; width: 100%; max-width: 420px; height: fit-content; }
-
+.ship-title { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 14px; color: #2a2a2a; letter-spacing: -0.3px; cursor: pointer; }
+.ship-title .tap-hint { opacity: 0.4; font-weight: 400; font-size: 14px; display: block; }
+.exporting .tap-hint { display: none !important; }
 .circles-row { display: flex; justify-content: center; align-items: flex-end; gap: 24px; margin-bottom: 20px; }
 .avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .circle-container { position: relative; width: 110px; height: 110px; cursor: pointer; }
@@ -43,6 +45,7 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 </head>
 <body>
 <div id="card">
+  <div class="ship-title" id="shipTitle"><span class="tap-hint">tap to edit</span>[Ship Name]</div>
   <div class="circles-row">
     <div class="avatar-wrap">
       <div class="circle-container" id="circleA">
@@ -285,6 +288,13 @@ document.getElementById('exportBtn').addEventListener('click', async () => {
   btn.style.visibility = '';
   btn.innerHTML = '<i class="ti ti-download" aria-hidden="true"></i> Export as PNG';
   btn.disabled = false;
+});
+
+document.getElementById('shipTitle').addEventListener('click', () => {
+  const val = prompt('Enter ship name:');
+  if (val !== null) {
+    document.getElementById('shipTitle').innerHTML = `<span class="tap-hint">tap to edit</span>${val || '[Ship Name]'}`;
+  }
 });
 
 buildMeters();
