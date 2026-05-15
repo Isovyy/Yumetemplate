@@ -10,8 +10,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: center; padding: 20px; font-family: Georgia, serif; }
 #card { background: white; border-radius: 20px; border: 1.5px solid #f0e0d0; padding: 16px 14px 20px; width: 100%; max-width: 420px; height: fit-content; }
-.ship-title { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 14px; color: #2a2a2a; letter-spacing: -0.3px; cursor: pointer; }
-.ship-title span { opacity: 0.4; font-weight: 400; font-size: 14px; display: block; }
+
 .circles-row { display: flex; justify-content: center; align-items: flex-end; gap: 24px; margin-bottom: 20px; }
 .avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .circle-container { position: relative; width: 110px; height: 110px; cursor: pointer; }
@@ -44,7 +43,6 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 </head>
 <body>
 <div id="card">
-  <div class="ship-title" id="shipTitle"><span>tap to edit</span>[Ship Name]</div>
   <div class="circles-row">
     <div class="avatar-wrap">
       <div class="circle-container" id="circleA">
@@ -181,13 +179,6 @@ document.getElementById('colorB').addEventListener('input', e => {
   updateAllColors();
 });
 
-document.getElementById('shipTitle').addEventListener('click', () => {
-  const val = prompt('Enter ship name:');
-  if (val !== null) {
-    document.getElementById('shipTitle').innerHTML = `<span>tap to edit</span>${val || '[Ship Name]'}`;
-  }
-});
-
 const imageState = { A: null, B: null };
 const dragState = { A: { on: false, lx: 0, ly: 0 }, B: { on: false, lx: 0, ly: 0 } };
 const imgOff = { A: { x: 0, y: 0, zoom: 1 }, B: { x: 0, y: 0, zoom: 1 } };
@@ -278,10 +269,17 @@ document.getElementById('exportBtn').addEventListener('click', async () => {
       logging: false,
       ignoreElements: el => el.classList.contains('export-hide') || el === btn
     });
-    const link = document.createElement('a');
-    link.download = 'compatibility-card.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+    const dataUrl = canvas.toDataURL('image/png');
+    const newTab = window.open();
+    if (newTab) {
+      newTab.document.write(`<html><body style="margin:0;background:#111;display:flex;flex-direction:column;align-items:center;padding:20px"><img src="${dataUrl}" style="max-width:100%;border-radius:12px"><br><a href="${dataUrl}" download="compatibility-card.png" style="color:white;font-family:sans-serif;font-size:16px;padding:12px 24px;background:#333;border-radius:8px;text-decoration:none;margin-top:12px">⬇ Download PNG</a><p style="color:#888;font-family:sans-serif;font-size:13px;margin-top:10px">On mobile: tap & hold the image → Save to Photos</p></body></html>`);
+      newTab.document.close();
+    } else {
+      const link = document.createElement('a');
+      link.download = 'compatibility-card.png';
+      link.href = dataUrl;
+      link.click();
+    }
   } catch { alert('Export failed. Try again!'); }
   card.classList.remove('exporting');
   btn.style.visibility = '';
