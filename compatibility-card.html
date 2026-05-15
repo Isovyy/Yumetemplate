@@ -15,14 +15,17 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 .circles-row { display: flex; justify-content: center; align-items: flex-end; gap: 24px; margin-bottom: 20px; }
 .avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .circle-container { position: relative; width: 110px; height: 110px; cursor: pointer; }
-.circle-container canvas { position: absolute; top: 0; left: 0; border-radius: 50%; }
+.circle-canvas { position: absolute; top: 0; left: 0; width: 110px; height: 110px; border-radius: 50%; }
 .circle-ring { position: absolute; top: 0; left: 0; width: 110px; height: 110px; border-radius: 50%; border: 3.5px solid #1a1a1a; pointer-events: none; z-index: 10; }
 .upload-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; z-index: 5; pointer-events: none; }
 .upload-hint i { font-size: 28px; color: #bbb; }
 .circle-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 8; border-radius: 50%; }
+.export-hide { transition: opacity 0.15s; }
+.exporting .export-hide { visibility: hidden !important; height: 0 !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important; min-height: 0 !important; }
 .color-picker-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .color-picker-wrap label { font-size: 10px; color: #999; }
-.color-picker-wrap input[type=color] { width: 32px; height: 20px; border: none; padding: 0; cursor: pointer; background: none; }
+.color-dot { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #ccc; cursor: pointer; position: relative; overflow: hidden; }
+.color-dot input[type=color] { position: absolute; inset: -6px; opacity: 0; cursor: pointer; width: 150%; height: 150%; }
 .meters { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
 .meter-row { display: flex; align-items: center; gap: 6px; }
 .meter-label { font-size: 11px; font-weight: 600; color: #333; text-align: right; flex: 0 0 78px; line-height: 1.2; }
@@ -45,33 +48,37 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
   <div class="circles-row">
     <div class="avatar-wrap">
       <div class="circle-container" id="circleA">
-        <canvas id="canvasA" width="110" height="110"></canvas>
+        <canvas id="canvasA" width="440" height="440" class="circle-canvas"></canvas>
         <div class="upload-hint" id="hintA"><i class="ti ti-camera"></i></div>
         <div class="circle-ring"></div>
         <input type="file" accept="image/*" class="circle-input" id="fileA">
       </div>
-      <div class="zoom-controls" id="zoomWrapA" style="display:none">
+      <div class="zoom-controls export-hide" id="zoomWrapA" style="display:none">
         <input type="range" min="1" max="4" step="0.01" value="1" id="zoomA">
         <label>zoom & drag to crop</label>
       </div>
-      <div class="color-picker-wrap">
-        <input type="color" id="colorA" value="#a8c97f">
+      <div class="color-picker-wrap export-hide">
+        <div class="color-dot" id="dotA" style="background:#a8c97f">
+          <input type="color" id="colorA" value="#a8c97f">
+        </div>
         <label>heart color</label>
       </div>
     </div>
     <div class="avatar-wrap">
       <div class="circle-container" id="circleB">
-        <canvas id="canvasB" width="110" height="110"></canvas>
+        <canvas id="canvasB" width="440" height="440" class="circle-canvas"></canvas>
         <div class="upload-hint" id="hintB"><i class="ti ti-camera"></i></div>
         <div class="circle-ring"></div>
         <input type="file" accept="image/*" class="circle-input" id="fileB">
       </div>
-      <div class="zoom-controls" id="zoomWrapB" style="display:none">
+      <div class="zoom-controls export-hide" id="zoomWrapB" style="display:none">
         <input type="range" min="1" max="4" step="0.01" value="1" id="zoomB">
         <label>zoom & drag to crop</label>
       </div>
-      <div class="color-picker-wrap">
-        <input type="color" id="colorB" value="#5bc4f5">
+      <div class="color-picker-wrap export-hide">
+        <div class="color-dot" id="dotB" style="background:#5bc4f5">
+          <input type="color" id="colorB" value="#5bc4f5">
+        </div>
         <label>heart color</label>
       </div>
     </div>
@@ -81,6 +88,8 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 </div>
 
 <script>
+const CANVAS_SIZE = 440;
+
 const traits = [
   ["Cooks","Orders takeout"],
   ["Messy Sleeper","Flat Sleeper"],
@@ -124,12 +133,10 @@ function buildMeters() {
 function attachDrag(sliderId, trackId, rowIndex, key) {
   const el = document.getElementById(sliderId);
   let active = false;
-
   function getPos(clientX) {
     const rect = document.getElementById(trackId).getBoundingClientRect();
     return Math.max(0.02, Math.min(0.98, (clientX - rect.left) / rect.width));
   }
-
   el.addEventListener('mousedown', e => {
     active = true;
     el.style.zIndex = 10;
@@ -138,11 +145,7 @@ function attachDrag(sliderId, trackId, rowIndex, key) {
     if (other) other.style.zIndex = 5;
     e.preventDefault();
   });
-  el.addEventListener('touchstart', e => {
-    active = true;
-    e.preventDefault();
-  }, { passive: false });
-
+  el.addEventListener('touchstart', e => { active = true; e.preventDefault(); }, { passive: false });
   document.addEventListener('mousemove', e => {
     if (!active) return;
     positions[rowIndex][key] = getPos(e.clientX);
@@ -167,8 +170,16 @@ function updateAllColors() {
   });
 }
 
-document.getElementById('colorA').addEventListener('input', e => { colorA = e.target.value; updateAllColors(); });
-document.getElementById('colorB').addEventListener('input', e => { colorB = e.target.value; updateAllColors(); });
+document.getElementById('colorA').addEventListener('input', e => {
+  colorA = e.target.value;
+  document.getElementById('dotA').style.background = colorA;
+  updateAllColors();
+});
+document.getElementById('colorB').addEventListener('input', e => {
+  colorB = e.target.value;
+  document.getElementById('dotB').style.background = colorB;
+  updateAllColors();
+});
 
 document.getElementById('shipTitle').addEventListener('click', () => {
   const val = prompt('Enter ship name:');
@@ -177,7 +188,6 @@ document.getElementById('shipTitle').addEventListener('click', () => {
   }
 });
 
-// Photo / canvas logic
 const imageState = { A: null, B: null };
 const dragState = { A: { on: false, lx: 0, ly: 0 }, B: { on: false, lx: 0, ly: 0 } };
 const imgOff = { A: { x: 0, y: 0, zoom: 1 }, B: { x: 0, y: 0, zoom: 1 } };
@@ -185,22 +195,23 @@ const imgOff = { A: { x: 0, y: 0, zoom: 1 }, B: { x: 0, y: 0, zoom: 1 } };
 function drawCircle(who) {
   const canvas = document.getElementById('canvas' + who);
   const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, 110, 110);
+  const S = CANVAS_SIZE, R = S / 2;
+  ctx.clearRect(0, 0, S, S);
   ctx.save();
   ctx.beginPath();
-  ctx.arc(55, 55, 53, 0, Math.PI * 2);
+  ctx.arc(R, R, R - 2, 0, Math.PI * 2);
   ctx.clip();
   const img = imageState[who];
   const s = imgOff[who];
   if (img) {
-    const scale = Math.min(110 / img.width, 110 / img.height) * s.zoom;
+    const scale = Math.min(S / img.width, S / img.height) * s.zoom;
     const w = img.width * scale, h = img.height * scale;
-    ctx.drawImage(img, (110 - w) / 2 + s.x, (110 - h) / 2 + s.y, w, h);
+    ctx.drawImage(img, (S - w) / 2 + s.x, (S - h) / 2 + s.y, w, h);
   } else {
-    ctx.fillStyle = '#f0f0f0'; ctx.fillRect(0, 0, 110, 110);
+    ctx.fillStyle = '#f0f0f0'; ctx.fillRect(0, 0, S, S);
     ctx.fillStyle = '#ddd';
-    ctx.beginPath(); ctx.arc(55, 42, 18, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(55, 75, 28, 20, 0, 0, Math.PI); ctx.fill();
+    ctx.beginPath(); ctx.arc(R, R * 0.76, R * 0.33, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(R, R * 1.36, R * 0.51, R * 0.36, 0, 0, Math.PI); ctx.fill();
   }
   ctx.restore();
 }
@@ -212,7 +223,8 @@ function drawCircle(who) {
     const file = e.target.files[0]; if (!file) return;
     const img = new Image();
     img.onload = () => {
-      imageState[who] = img; imgOff[who] = { x: 0, y: 0, zoom: 1 };
+      imageState[who] = img;
+      imgOff[who] = { x: 0, y: 0, zoom: 1 };
       document.getElementById('zoomWrap' + who).style.display = 'flex';
       document.getElementById('hint' + who).style.display = 'none';
       drawCircle(who);
@@ -226,17 +238,24 @@ function drawCircle(who) {
 
   const circ = document.getElementById('circle' + who);
   const ds = dragState[who];
+  const RATIO = CANVAS_SIZE / 110;
+
   circ.addEventListener('mousedown', e => { if (!imageState[who]) return; ds.on = true; ds.lx = e.clientX; ds.ly = e.clientY; e.preventDefault(); });
   circ.addEventListener('touchstart', e => { if (!imageState[who]) return; ds.on = true; ds.lx = e.touches[0].clientX; ds.ly = e.touches[0].clientY; }, { passive: true });
+
   document.addEventListener('mousemove', e => {
     if (!ds.on) return;
-    imgOff[who].x += e.clientX - ds.lx; imgOff[who].y += e.clientY - ds.ly;
-    ds.lx = e.clientX; ds.ly = e.clientY; drawCircle(who);
+    imgOff[who].x += (e.clientX - ds.lx) * RATIO;
+    imgOff[who].y += (e.clientY - ds.ly) * RATIO;
+    ds.lx = e.clientX; ds.ly = e.clientY;
+    drawCircle(who);
   });
   document.addEventListener('touchmove', e => {
     if (!ds.on) return;
-    imgOff[who].x += e.touches[0].clientX - ds.lx; imgOff[who].y += e.touches[0].clientY - ds.ly;
-    ds.lx = e.touches[0].clientX; ds.ly = e.touches[0].clientY; drawCircle(who);
+    imgOff[who].x += (e.touches[0].clientX - ds.lx) * RATIO;
+    imgOff[who].y += (e.touches[0].clientY - ds.ly) * RATIO;
+    ds.lx = e.touches[0].clientX; ds.ly = e.touches[0].clientY;
+    drawCircle(who);
   }, { passive: true });
   document.addEventListener('mouseup', () => { ds.on = false; });
   document.addEventListener('touchend', () => { ds.on = false; });
@@ -244,14 +263,28 @@ function drawCircle(who) {
 
 document.getElementById('exportBtn').addEventListener('click', async () => {
   const btn = document.getElementById('exportBtn');
-  btn.textContent = 'Exporting…'; btn.disabled = true;
+  const card = document.getElementById('card');
+  btn.textContent = 'Exporting…';
+  btn.disabled = true;
+  card.classList.add('exporting');
+  btn.style.visibility = 'hidden';
+  await new Promise(r => setTimeout(r, 80));
   try {
-    const canvas = await html2canvas(document.getElementById('card'), { scale: 3, useCORS: true, backgroundColor: '#ffffff', logging: false });
+    const canvas = await html2canvas(card, {
+      scale: 3,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      ignoreElements: el => el.classList.contains('export-hide') || el === btn
+    });
     const link = document.createElement('a');
     link.download = 'compatibility-card.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
   } catch { alert('Export failed. Try again!'); }
+  card.classList.remove('exporting');
+  btn.style.visibility = '';
   btn.innerHTML = '<i class="ti ti-download" aria-hidden="true"></i> Export as PNG';
   btn.disabled = false;
 });
