@@ -23,10 +23,14 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 .circle-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 8; border-radius: 50%; }
 .export-hide { transition: opacity 0.15s; }
 .exporting .export-hide { visibility: hidden !important; height: 0 !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important; min-height: 0 !important; }
-.color-picker-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.color-picker-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .color-picker-wrap label { font-size: 10px; color: #999; }
-.color-dot { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #ccc; cursor: pointer; position: relative; overflow: hidden; }
+.color-picker-row { display: flex; align-items: center; gap: 6px; }
+.color-dot { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #ccc; cursor: pointer; position: relative; overflow: hidden; flex-shrink: 0; }
 .color-dot input[type=color] { position: absolute; inset: -6px; opacity: 0; cursor: pointer; width: 150%; height: 150%; }
+.hex-input { width: 68px; font-size: 11px; font-family: monospace; border: 1px solid #ddd; border-radius: 6px; padding: 3px 6px; color: #333; outline: none; text-transform: uppercase; }
+.hex-input:focus { border-color: #bbb; }
+.hex-input.invalid { border-color: #f0a0a0; color: #c00; }
 .meters { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
 .meter-row { display: flex; align-items: center; gap: 6px; }
 .meter-hint { text-align: center; font-size: 11px; color: #aaa; margin-bottom: 10px; font-family: sans-serif; }
@@ -72,8 +76,11 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
       <div class="char-name" id="nameA" title="double-tap to edit">Person A</div>
       <div id="heartBadgeA" class="export-only" style="margin-top:2px"><svg id="heartSvgA" viewBox="0 0 24 24" width="28" height="28" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#a8c97f" stroke="#1a1a1a" stroke-width="1.5"/></svg></div>
       <div class="color-picker-wrap export-hide">
-        <div class="color-dot" id="dotA" style="background:#a8c97f">
-          <input type="color" id="colorA" value="#a8c97f">
+        <div class="color-picker-row">
+          <div class="color-dot" id="dotA" style="background:#a8c97f">
+            <input type="color" id="colorA" value="#a8c97f">
+          </div>
+          <input type="text" class="hex-input" id="hexA" value="#A8C97F" maxlength="7">
         </div>
         <label>heart color</label>
       </div>
@@ -92,8 +99,11 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
       <div class="char-name" id="nameB" title="double-tap to edit">Person B</div>
       <div id="heartBadgeB" class="export-only" style="margin-top:2px"><svg id="heartSvgB" viewBox="0 0 24 24" width="28" height="28" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#5bc4f5" stroke="#1a1a1a" stroke-width="1.5"/></svg></div>
       <div class="color-picker-wrap export-hide">
-        <div class="color-dot" id="dotB" style="background:#5bc4f5">
-          <input type="color" id="colorB" value="#5bc4f5">
+        <div class="color-picker-row">
+          <div class="color-dot" id="dotB" style="background:#5bc4f5">
+            <input type="color" id="colorB" value="#5bc4f5">
+          </div>
+          <input type="text" class="hex-input" id="hexB" value="#5BC4F5" maxlength="7">
         </div>
         <label>heart color</label>
       </div>
@@ -281,17 +291,47 @@ function updateAllColors() {
   });
 }
 
-document.getElementById('colorA').addEventListener('input', e => {
-  colorA = e.target.value;
-  document.getElementById('dotA').style.background = colorA;
-  document.getElementById('heartSvgA').querySelector('path').setAttribute('fill', colorA);
+function applyColor(who, hex) {
+  const color = hex.startsWith('#') ? hex : '#' + hex;
+  if (who === 'A') {
+    colorA = color;
+    document.getElementById('dotA').style.background = color;
+    document.getElementById('colorA').value = color;
+    document.getElementById('hexA').value = color.toUpperCase();
+    document.getElementById('heartSvgA').querySelector('path').setAttribute('fill', color);
+  } else {
+    colorB = color;
+    document.getElementById('dotB').style.background = color;
+    document.getElementById('colorB').value = color;
+    document.getElementById('hexB').value = color.toUpperCase();
+    document.getElementById('heartSvgB').querySelector('path').setAttribute('fill', color);
+  }
   updateAllColors();
+}
+
+function isValidHex(val) { return /^#[0-9A-Fa-f]{6}$/.test(val); }
+
+document.getElementById('colorA').addEventListener('input', e => applyColor('A', e.target.value));
+document.getElementById('colorB').addEventListener('input', e => applyColor('B', e.target.value));
+
+document.getElementById('hexA').addEventListener('input', e => {
+  const val = e.target.value.startsWith('#') ? e.target.value : '#' + e.target.value;
+  e.target.classList.toggle('invalid', !isValidHex(val));
+  if (isValidHex(val)) applyColor('A', val);
 });
-document.getElementById('colorB').addEventListener('input', e => {
-  colorB = e.target.value;
-  document.getElementById('dotB').style.background = colorB;
-  document.getElementById('heartSvgB').querySelector('path').setAttribute('fill', colorB);
-  updateAllColors();
+document.getElementById('hexA').addEventListener('blur', e => {
+  const val = e.target.value.startsWith('#') ? e.target.value : '#' + e.target.value;
+  if (!isValidHex(val)) { e.target.value = colorA.toUpperCase(); e.target.classList.remove('invalid'); }
+});
+
+document.getElementById('hexB').addEventListener('input', e => {
+  const val = e.target.value.startsWith('#') ? e.target.value : '#' + e.target.value;
+  e.target.classList.toggle('invalid', !isValidHex(val));
+  if (isValidHex(val)) applyColor('B', val);
+});
+document.getElementById('hexB').addEventListener('blur', e => {
+  const val = e.target.value.startsWith('#') ? e.target.value : '#' + e.target.value;
+  if (!isValidHex(val)) { e.target.value = colorB.toUpperCase(); e.target.classList.remove('invalid'); }
 });
 
 const imageState = { A: null, B: null };
