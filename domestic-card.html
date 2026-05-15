@@ -9,9 +9,10 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: center; padding: 20px; font-family: Georgia, serif; }
-#card { background: white; border-radius: 20px; border: 1.5px solid #f0e0d0; padding: 16px 14px 20px; width: 100%; max-width: 420px; height: fit-content; }
-.ship-title { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 14px; color: #2a2a2a; letter-spacing: -0.3px; cursor: pointer; }
-.ship-title .tap-hint { opacity: 0.4; font-weight: 400; font-size: 14px; display: block; }
+#card { background: white; border-radius: 20px; border: 1.5px solid #f0e0d0; padding: 16px 14px 20px; width: 100%; max-width: 420px; height: fit-content;
+  --fg: #2a2a2a; --fg-sub: #333; --fg-hint: #aaa; --line: #ddd; --btn-bg: #2a2a2a; --btn-fg: #ffffff; --hex-border: #ddd; --hex-fg: #333; }
+.ship-title { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 14px; color: var(--fg); letter-spacing: -0.3px; cursor: pointer; }
+.ship-title .tap-hint { color: var(--fg-hint); font-weight: 400; font-size: 14px; display: block; }
 .exporting .tap-hint { display: none !important; }
 .circles-row { display: flex; justify-content: center; align-items: flex-end; gap: 24px; margin-bottom: 20px; }
 .avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
@@ -24,37 +25,39 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 .export-hide { transition: opacity 0.15s; }
 .exporting .export-hide { visibility: hidden !important; height: 0 !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important; min-height: 0 !important; }
 .color-picker-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.color-picker-wrap label { font-size: 10px; color: #999; }
+.color-picker-wrap label { font-size: 10px; color: var(--fg-hint); }
 .color-picker-row { display: flex; align-items: center; gap: 6px; }
 .color-dot { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #ccc; cursor: pointer; position: relative; overflow: hidden; flex-shrink: 0; }
 .color-dot input[type=color] { position: absolute; inset: -6px; opacity: 0; cursor: pointer; width: 150%; height: 150%; }
-.hex-input { width: 68px; font-size: 11px; font-family: monospace; border: 1px solid #ddd; border-radius: 6px; padding: 3px 6px; color: #333; outline: none; text-transform: uppercase; }
+.hex-input { width: 68px; font-size: 11px; font-family: monospace; border: 1px solid var(--hex-border, #ddd); border-radius: 6px; padding: 3px 6px; color: var(--hex-fg, #333); background: transparent; outline: none; text-transform: uppercase; }
 .hex-input:focus { border-color: #bbb; }
 .hex-input.invalid { border-color: #f0a0a0; color: #c00; }
 .meters { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
 .meter-row { display: flex; align-items: center; gap: 6px; }
-.meter-hint { text-align: center; font-size: 11px; color: #aaa; margin-bottom: 10px; font-family: sans-serif; }
-.meter-hint button { background: none; border: 1px solid #ddd; border-radius: 6px; font-size: 11px; color: #888; cursor: pointer; padding: 2px 8px; font-family: sans-serif; }
-.meter-hint button:hover { background: #f5f5f5; color: #333; }
-.meter-label { font-size: 11px; font-weight: 600; color: #333; text-align: right; flex: 0 0 78px; line-height: 1.2; cursor: default; border-radius: 4px; padding: 1px 2px; }
-.meter-label.editing-active { outline: 1.5px dashed #bbb; background: #fafafa; cursor: text; }
-.meter-label input.label-input { width: 100%; font-size: 11px; font-weight: 600; color: #333; border: none; background: transparent; outline: none; font-family: Georgia, serif; text-align: right; padding: 0; }
+.meter-hint { text-align: center; font-size: 11px; color: var(--fg-hint); margin-bottom: 10px; font-family: sans-serif; }
+.meter-hint button { background: none; border: 1px solid var(--fg-hint); border-radius: 6px; font-size: 11px; color: var(--fg-hint); cursor: pointer; padding: 2px 8px; font-family: sans-serif; }
+.meter-hint button:hover { background: rgba(128,128,128,0.15); }
+.meter-label { font-size: 11px; font-weight: 600; color: var(--fg-sub); text-align: right; flex: 0 0 78px; line-height: 1.2; cursor: default; border-radius: 4px; padding: 1px 2px; }
+.meter-label.editing-active { outline: 1.5px dashed var(--fg-hint); background: rgba(128,128,128,0.08); cursor: text; }
+.meter-label input.label-input { width: 100%; font-size: 11px; font-weight: 600; color: var(--fg-sub); border: none; background: transparent; outline: none; font-family: Georgia, serif; text-align: right; padding: 0; }
 .meter-label.right input.label-input { text-align: left; }
 .meter-label.right { text-align: left; }
 .meter-track { flex: 1; position: relative; height: 20px; display: flex; align-items: center; }
-.meter-line { width: 100%; height: 2px; background: #ddd; border-radius: 2px; position: absolute; }
+.meter-line { width: 100%; height: 2px; background: var(--line); border-radius: 2px; position: absolute; }
 .heart-slider { position: absolute; width: 20px; height: 20px; cursor: grab; transform: translateX(-50%); top: 50%; margin-top: -10px; z-index: 5; user-select: none; touch-action: none; }
 .heart-slider:active { cursor: grabbing; }
 .heart-slider svg { width: 20px; height: 20px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.18)); }
-.export-btn { display: block; width: 100%; padding: 11px; background: #2a2a2a; color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: 0.3px; margin-top: 4px; }
+.bg-picker-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
+.bg-picker-label { font-size: 11px; color: var(--fg-hint); font-family: sans-serif; }
+.export-btn { display: block; width: 100%; padding: 11px; background: var(--btn-bg); color: var(--btn-fg); border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: 0.3px; margin-top: 4px; }
 .export-btn:active { opacity: 0.85; }
-.char-name { font-size: 13px; font-weight: 700; color: #2a2a2a; text-align: center; margin-top: 6px; cursor: default; border-radius: 4px; padding: 1px 4px; min-width: 60px; }
-.char-name.editing-active { outline: 1.5px dashed #bbb; background: #fafafa; cursor: text; }
-.char-name input.name-input { width: 100%; font-size: 13px; font-weight: 700; color: #2a2a2a; border: none; background: transparent; outline: none; font-family: Georgia, serif; text-align: center; padding: 0; }
+.char-name { font-size: 13px; font-weight: 700; color: var(--fg); text-align: center; margin-top: 6px; cursor: default; border-radius: 4px; padding: 1px 4px; min-width: 60px; }
+.char-name.editing-active { outline: 1.5px dashed var(--fg-hint); background: rgba(128,128,128,0.08); cursor: text; }
+.char-name input.name-input { width: 100%; font-size: 13px; font-weight: 700; color: var(--fg); border: none; background: transparent; outline: none; font-family: Georgia, serif; text-align: center; padding: 0; }
 .export-only { display: none; }
 .exporting .export-only { display: block !important; }
 .zoom-controls { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.zoom-controls label { font-size: 9px; color: #aaa; }
+.zoom-controls label { font-size: 9px; color: var(--fg-hint); }
 .zoom-controls input[type=range] { width: 80px; }
 </style>
 </head>
@@ -111,6 +114,15 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
   </div>
   <div class="meters" id="metersContainer"></div>
   <div class="meter-hint export-hide" id="editHint">double-tap any label to edit &nbsp;·&nbsp; <button id="resetBtn">reset labels</button></div>
+  <div class="bg-picker-row export-hide">
+    <span class="bg-picker-label">card background</span>
+    <div class="color-picker-row">
+      <div class="color-dot" id="dotBg" style="background:#ffffff">
+        <input type="color" id="colorBg" value="#ffffff">
+      </div>
+      <input type="text" class="hex-input" id="hexBg" value="#FFFFFF" maxlength="7">
+    </div>
+  </div>
   <button class="export-btn" id="exportBtn"><i class="ti ti-download" aria-hidden="true"></i> Export as PNG</button>
 </div>
 
@@ -214,6 +226,7 @@ document.getElementById('resetBtn').addEventListener('click', () => {
     traits[i][1] = pair[1];
   });
   buildMeters();
+  applyBgColor(document.getElementById('colorBg').value);
 });
 
 function makeNameEditable(el, defaultName) {
@@ -290,6 +303,58 @@ function updateAllColors() {
     if (sB) sB.innerHTML = heartSVG(colorB);
   });
 }
+
+function hexToRgb(hex) {
+  const h = hex.replace('#','');
+  return { r: parseInt(h.slice(0,2),16), g: parseInt(h.slice(2,4),16), b: parseInt(h.slice(4,6),16) };
+}
+
+function isDark(hex) {
+  const { r, g, b } = hexToRgb(hex);
+  // perceived luminance
+  return (0.299 * r + 0.587 * g + 0.114 * b) < 128;
+}
+
+function applyBgColor(hex) {
+  const color = hex.startsWith('#') ? hex : '#' + hex;
+  const dark = isDark(color);
+  const textColor = dark ? '#f0f0f0' : '#2a2a2a';
+  const subTextColor = dark ? '#cccccc' : '#333333';
+  const lineColor = dark ? '#666666' : '#dddddd';
+  const borderColor = dark ? '#555555' : '#f0e0d0';
+  const hintColor = dark ? '#999999' : '#aaaaaa';
+  const exportBtnBg = dark ? '#f0f0f0' : '#2a2a2a';
+  const exportBtnText = dark ? '#1a1a1a' : '#ffffff';
+  const hexInputBorder = dark ? '#666' : '#ddd';
+  const hexInputColor = dark ? '#eee' : '#333';
+
+  const card = document.getElementById('card');
+  card.style.background = color;
+  card.style.borderColor = borderColor;
+  card.style.setProperty('--fg', textColor);
+  card.style.setProperty('--fg-sub', subTextColor);
+  card.style.setProperty('--fg-hint', hintColor);
+  card.style.setProperty('--line', lineColor);
+  card.style.setProperty('--btn-bg', exportBtnBg);
+  card.style.setProperty('--btn-fg', exportBtnText);
+  card.style.setProperty('--hex-border', hexInputBorder);
+  card.style.setProperty('--hex-fg', hexInputColor);
+
+  document.getElementById('dotBg').style.background = color;
+  document.getElementById('colorBg').value = color;
+  document.getElementById('hexBg').value = color.toUpperCase();
+}
+
+document.getElementById('colorBg').addEventListener('input', e => applyBgColor(e.target.value));
+document.getElementById('hexBg').addEventListener('input', e => {
+  const val = e.target.value.startsWith('#') ? e.target.value : '#' + e.target.value;
+  e.target.classList.toggle('invalid', !isValidHex(val));
+  if (isValidHex(val)) applyBgColor(val);
+});
+document.getElementById('hexBg').addEventListener('blur', e => {
+  const val = e.target.value.startsWith('#') ? e.target.value : '#' + e.target.value;
+  if (!isValidHex(val)) { e.target.value = document.getElementById('colorBg').value.toUpperCase(); e.target.classList.remove('invalid'); }
+});
 
 function applyColor(who, hex) {
   const color = hex.startsWith('#') ? hex : '#' + hex;
