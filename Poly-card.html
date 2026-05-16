@@ -20,11 +20,11 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 .exporting .tap-hint { display: none !important; }
 
 /* circles */
-.circles-row { display: flex; justify-content: center; align-items: flex-start; flex-wrap: wrap; gap: 16px 20px; margin-bottom: 20px; }
-.avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100px; }
-.circle-container { position: relative; width: 100px; height: 100px; cursor: pointer; flex-shrink: 0; }
-.circle-canvas { position: absolute; top: 0; left: 0; width: 100px; height: 100px; border-radius: 50%; }
-.circle-ring { position: absolute; top: 0; left: 0; width: 100px; height: 100px; border-radius: 50%; border: 3.5px solid #1a1a1a; pointer-events: none; z-index: 10; }
+.circles-row { display: flex; justify-content: center; align-items: flex-start; flex-wrap: nowrap; gap: 10px; margin-bottom: 20px; }
+.avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+.circle-container { position: relative; cursor: pointer; flex-shrink: 0; }
+.circle-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; }
+.circle-ring { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; border: 3.5px solid #1a1a1a; pointer-events: none; z-index: 10; }
 .upload-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; z-index: 5; pointer-events: none; }
 .upload-hint i { font-size: 26px; color: #bbb; }
 .circle-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 8; border-radius: 50%; }
@@ -171,6 +171,34 @@ function drawCircle(pid) {
   ctx.restore();
 }
 
+/* ── CIRCLE SIZE ── */
+function getCircleSize() {
+  // 2 people=110, 3=90, 4=76
+  return [110, 110, 90, 76][numPersons - 1];
+}
+
+function setCircleSize() {
+  const sz = getCircleSize();
+  const iconSize = [28, 28, 24, 20][numPersons - 1];
+  const nameSize = [12, 12, 11, 10][numPersons - 1];
+  document.querySelectorAll('.circle-container').forEach(el => {
+    el.style.width = sz + 'px';
+    el.style.height = sz + 'px';
+  });
+  document.querySelectorAll('.avatar-wrap').forEach(el => {
+    el.style.width = sz + 'px';
+  });
+  document.querySelectorAll('.upload-hint i').forEach(el => {
+    el.style.fontSize = iconSize + 'px';
+  });
+  document.querySelectorAll('.char-name').forEach(el => {
+    el.style.fontSize = nameSize + 'px';
+  });
+  document.querySelectorAll('.zoom-controls input[type=range]').forEach(el => {
+    el.style.width = Math.max(56, sz - 16) + 'px';
+  });
+}
+
 /* ── BUILD CIRCLES ── */
 function buildCircles() {
   const row = document.getElementById('circlesRow');
@@ -211,13 +239,12 @@ function buildCircles() {
     setupColorPicker(pid);
     makeNameEditable(document.getElementById(`name${pid}`), p.name, pid);
   }
+  setCircleSize();
   updateAddRemoveBtns();
 }
 
-/* ── SETUP CIRCLE drag/upload ── */
 function setupCircle(pid) {
   const p = persons[pid];
-  const RATIO = CANVAS_SIZE / 100;
 
   document.getElementById(`file${pid}`).addEventListener('change', e => {
     const file = e.target.files[0]; if (!file) return;
@@ -246,11 +273,15 @@ function setupCircle(pid) {
   }, { passive: true });
   document.addEventListener('mousemove', e => {
     if (!p.drag.on) return;
+    const sz = getCircleSize();
+    const RATIO = CANVAS_SIZE / sz;
     p.offset.x += (e.clientX - p.drag.lx) * RATIO; p.offset.y += (e.clientY - p.drag.ly) * RATIO;
     p.drag.lx = e.clientX; p.drag.ly = e.clientY; drawCircle(pid);
   });
   document.addEventListener('touchmove', e => {
     if (!p.drag.on) return;
+    const sz = getCircleSize();
+    const RATIO = CANVAS_SIZE / sz;
     p.offset.x += (e.touches[0].clientX - p.drag.lx) * RATIO; p.offset.y += (e.touches[0].clientY - p.drag.ly) * RATIO;
     p.drag.lx = e.touches[0].clientX; p.drag.ly = e.touches[0].clientY; drawCircle(pid);
   }, { passive: true });
