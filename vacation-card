@@ -114,23 +114,26 @@ const PERSON_DEFAULTS = [
   { name: 'Person C', color: '#e05555' },
   { name: 'Person D', color: '#a855f5' },
   { name: 'Person E', color: '#f5a623' },
+  { name: 'Person F', color: '#ec4899' },
+  { name: 'Person G', color: '#14b8a6' },
+  { name: 'Person H', color: '#f97316' },
 ];
-const DEFAULT_POS = [0.2, 0.4, 0.55, 0.7, 0.85];
+const DEFAULT_POS = [0.15, 0.3, 0.43, 0.56, 0.69, 0.78, 0.87, 0.93];
 
 const DEFAULT_TRAITS = [
-  ["Plans the trip","Come along"],
-  ["Driver","Passenger princess"],
-  ["Packs a week early","Packs last second"],
-  ["Navigator","Follow the wind"],
-  ["Backpack only","Overweight baggage"],
-  ["Takes pictures","Lives in the moment"],
+  ["Plans the trip","Come along 🧳"],
+  ["Driver 🚗","Passenger princess 👑"],
+  ["Packs a week early","Packs last second 😅"],
+  ["Navigator 🗺️","Go where feet take me"],
+  ["Backpack only","Overweight baggage fee 💸"],
+  ["Takes pictures 📸","Lives in the moment"],
   ["Remembers chargers","Borrows yours the whole trip"],
-  ["Budget spreadsheet",'"We\'ll figure it out"'],
+  ["Budget spreadsheet 📊",'"We\'ll figure it out"'],
 ];
 
 const traits = DEFAULT_TRAITS.map(p => [...p]);
 // positions[rowIndex][personIndex]
-const positions = traits.map(() => [0.2, 0.4, 0.55, 0.7, 0.85]);
+const positions = traits.map(() => [0.15, 0.3, 0.43, 0.56, 0.69, 0.78, 0.87, 0.93]);
 
 // persons state
 let numPersons = 2;
@@ -174,29 +177,28 @@ function drawCircle(pid) {
 
 /* ── CIRCLE SIZE ── */
 function getCircleSize() {
-  // 2=110, 3=90, 4=76, 5=64
-  return [110, 110, 90, 76, 64][numPersons - 1];
+  return [110, 110, 90, 76, 64, 90, 76, 76][numPersons - 1];
 }
 
 function setCircleSize() {
   const sz = getCircleSize();
-  const iconSize = [28, 28, 24, 20, 16][numPersons - 1];
-  const nameSize = [12, 12, 11, 10, 9][numPersons - 1];
+  const iconSize = [28, 28, 24, 20, 16, 22, 20, 20][numPersons - 1];
+  const nameSize = [12, 12, 11, 10, 9, 11, 10, 10][numPersons - 1];
+  const row = document.getElementById('circlesRow');
+  row.style.flexWrap = numPersons >= 6 ? 'wrap' : 'nowrap';
+  const perRow = numPersons === 6 ? 3 : 4;
+  document.querySelectorAll('.avatar-wrap').forEach(el => {
+    el.style.width = sz + 'px';
+    el.style.flexBasis = numPersons >= 6 ? `calc(${100/perRow}% - 10px)` : '';
+  });
   document.querySelectorAll('.circle-container').forEach(el => {
     el.style.width = sz + 'px';
     el.style.height = sz + 'px';
   });
-  document.querySelectorAll('.avatar-wrap').forEach(el => {
-    el.style.width = sz + 'px';
-  });
-  document.querySelectorAll('.upload-hint i').forEach(el => {
-    el.style.fontSize = iconSize + 'px';
-  });
-  document.querySelectorAll('.char-name').forEach(el => {
-    el.style.fontSize = nameSize + 'px';
-  });
+  document.querySelectorAll('.upload-hint i').forEach(el => { el.style.fontSize = iconSize + 'px'; });
+  document.querySelectorAll('.char-name').forEach(el => { el.style.fontSize = nameSize + 'px'; });
   document.querySelectorAll('.zoom-controls input[type=range]').forEach(el => {
-    el.style.width = Math.max(56, sz - 16) + 'px';
+    el.style.width = Math.max(50, sz - 16) + 'px';
   });
 }
 
@@ -440,14 +442,14 @@ function attachDrag(sliderId, trackId, rowIndex, pid) {
 function updateAddRemoveBtns() {
   const addBtn = document.getElementById('addBtn');
   const removeBtn = document.getElementById('removeBtn');
-  addBtn.disabled = numPersons >= 5;
+  addBtn.disabled = numPersons >= 8;
   removeBtn.disabled = numPersons <= 2;
-  addBtn.textContent = numPersons >= 5 ? '＋ Max 5 people' : `＋ Add person (${numPersons}/5)`;
+  addBtn.textContent = numPersons >= 8 ? '＋ Max 8 people' : `＋ Add person (${numPersons}/8)`;
   removeBtn.textContent = `－ Remove last`;
 }
 
 document.getElementById('addBtn').addEventListener('click', () => {
-  if (numPersons >= 5) return;
+  if (numPersons >= 8) return;
   numPersons++;
   buildCircles();
   buildMeters();
