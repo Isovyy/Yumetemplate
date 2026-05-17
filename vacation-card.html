@@ -84,6 +84,11 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 .add-btn:disabled, .remove-btn:disabled { opacity: 0.3; cursor: default; background: none !important; }
 .export-btn { display: block; width: 100%; padding: 11px; background: var(--btn-bg); color: var(--btn-fg); border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: 0.3px; margin-top: 4px; }
 .export-btn:active { opacity: 0.85; }
+.contact-row { text-align: center; margin-top: 6px; font-size: 11px; font-family: sans-serif; color: #bbb; }
+.contact-row a { color: #aaa; text-decoration: none; border-bottom: 1px dashed #ccc; }
+.contact-row a:hover { color: #888; }
+.vacation-btn { display: block; text-align: center; margin-top: 10px; font-size: 12px; font-family: sans-serif; color: #aaa; text-decoration: none; padding: 4px; }
+.vacation-btn:hover { color: #888; }
 </style>
 </head>
 <body>
@@ -104,6 +109,13 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
     </div>
   </div>
   <button class="export-btn" id="exportBtn"><i class="ti ti-download"></i> Export as PNG</button>
+  <a href="https://yumetemplate.vercel.app" class="vacation-btn export-hide">Try the Compatibility version</a>
+  <div class="contact-row export-hide">
+    bugs? contact via
+    <a href="https://x.com/0xvltt" target="_blank">X @0xvltt</a>
+    or
+    <a href="https://0xvltt.straw.page" target="_blank">anonymously</a>
+  </div>
 </div>
 
 <script>
@@ -445,7 +457,7 @@ function updateAddRemoveBtns() {
   const addBtn = document.getElementById('addBtn');
   const removeBtn = document.getElementById('removeBtn');
   addBtn.disabled = numPersons >= 8;
-  removeBtn.disabled = numPersons <= 2;
+  removeBtn.disabled = numPersons <= 1;
   addBtn.textContent = numPersons >= 8 ? '＋ Max 8 people' : `＋ Add person (${numPersons}/8)`;
   removeBtn.textContent = `－ Remove last`;
 }
@@ -459,7 +471,7 @@ document.getElementById('addBtn').addEventListener('click', () => {
 });
 
 document.getElementById('removeBtn').addEventListener('click', () => {
-  if (numPersons <= 2) return;
+  if (numPersons <= 1) return;
   numPersons--;
   buildCircles();
   buildMeters();
