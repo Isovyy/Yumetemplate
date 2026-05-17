@@ -513,9 +513,9 @@ document.getElementById('hexBg').addEventListener('blur', e => {
 
 /* ── SHIP NAME ── */
 document.getElementById('shipTitle').addEventListener('click', () => {
-  const val = prompt('Enter ship name:');
+  const val = prompt('Enter ship/group name:');
   if (val !== null) {
-    document.getElementById('shipTitle').innerHTML = `<span class="tap-hint">tap to edit</span>${val || '[Ship Name]'}`;
+    document.getElementById('shipTitle').innerHTML = `<span class="tap-hint">tap to edit</span>${val || '[Name]'}`;
   }
 });
 
