@@ -525,8 +525,11 @@ document.getElementById('exportBtn').addEventListener('click', async () => {
   btn.style.visibility = 'hidden';
   await new Promise(r => setTimeout(r, 80));
   try {
+    // detect low memory devices (Android) and use lower scale
+    const isLowEnd = /android/i.test(navigator.userAgent);
+    const exportScale = isLowEnd ? 2 : 3;
     const canvas = await html2canvas(card, {
-      scale: 3, useCORS: true, allowTaint: true, backgroundColor: null, logging: false,
+      scale: exportScale, useCORS: true, allowTaint: true, backgroundColor: null, logging: false,
       ignoreElements: el => el.classList.contains('export-hide') || el === btn
     });
     const dataUrl = canvas.toDataURL('image/png');
