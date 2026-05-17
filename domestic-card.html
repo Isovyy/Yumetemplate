@@ -106,7 +106,7 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
     </div>
   </div>
   <button class="export-btn" id="exportBtn"><i class="ti ti-download"></i> Export as PNG</button>
-  <a href="https://yumetemplate.vercel.app/vacation-card.html" class="vacation-btn export-hide">Try the Vacation version</a>
+  <a href="https://yumetemplate.vercel.app/vacation-card.html" class="vacation-btn export-hide">🌴 Try the Vacation version</a>
 </div>
 
 <script>
@@ -233,11 +233,11 @@ function buildCircles() {
     wrap.innerHTML = `
       <div class="circle-container" id="circ${pid}">
         <canvas id="canvas${pid}" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" class="circle-canvas"></canvas>
-        <div class="upload-hint" id="hint${pid}"><i class="ti ti-camera"></i></div>
+        <div class="upload-hint" id="hint${pid}" style="${p.image ? 'display:none' : ''}"><i class="ti ti-camera"></i></div>
         <div class="circle-ring"></div>
         <input type="file" accept="image/*" class="circle-input" id="file${pid}">
       </div>
-      <div class="zoom-controls export-hide" id="zoomWrap${pid}" style="display:none">
+      <div class="zoom-controls export-hide" id="zoomWrap${pid}" style="${p.image ? 'display:flex' : 'display:none'}">
         <input type="range" min="1" max="4" step="0.01" value="${p.offset.zoom}" id="zoom${pid}">
         <label>zoom & drag</label>
       </div>
