@@ -93,7 +93,7 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 </head>
 <body>
 <div id="card">
-  <div class="ship-title" id="shipTitle"><span class="tap-hint">tap to edit</span>[Ship Name]</div>
+  <div class="ship-title" id="shipTitle"><span class="tap-hint">tap to edit</span>[Name]</div>
   <div class="circles-row" id="circlesRow"></div>
   <div class="meters" id="metersContainer"></div>
   <div class="meter-hint export-hide">double-tap any label to edit &nbsp;·&nbsp; <button id="resetBtn">reset labels</button></div>
@@ -109,7 +109,7 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
     </div>
   </div>
   <button class="export-btn" id="exportBtn"><i class="ti ti-download"></i> Export as PNG</button>
-  <a href="https://yumetemplate.vercel.app" class="vacation-btn export-hide">Try the Compatibility version</a>
+  <a href="https://yumetemplate.vercel.app/domestic-card.html" class="vacation-btn export-hide">Try the domestic version</a>
   <div class="contact-row export-hide">
     bugs? contact via
     <a href="https://x.com/0xvltt" target="_blank">X @0xvltt</a>
@@ -527,9 +527,9 @@ document.getElementById('hexBg').addEventListener('blur', e => {
 
 /* ── SHIP NAME ── */
 document.getElementById('shipTitle').addEventListener('click', () => {
-  const val = prompt('Enter ship name:');
+  const val = prompt('Enter (ship/group) name:');
   if (val !== null) {
-    document.getElementById('shipTitle').innerHTML = `<span class="tap-hint">tap to edit</span>${val || '[Ship Name]'}`;
+    document.getElementById('shipTitle').innerHTML = `<span class="tap-hint">tap to edit</span>${val || '[Name]'}`;
   }
 });
 
