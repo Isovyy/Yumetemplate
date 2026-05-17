@@ -88,7 +88,7 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 </head>
 <body>
 <div id="card">
-  <div class="ship-title" id="shipTitle"><span class="tap-hint">tap to edit</span>[Ship Name]</div>
+  <div class="ship-title" id="shipTitle"><span class="tap-hint">tap to edit</span>[Name]</div>
   <div class="circles-row" id="circlesRow"></div>
   <div class="meters" id="metersContainer"></div>
   <div class="meter-hint export-hide">double-tap any label to edit &nbsp;·&nbsp; <button id="resetBtn">reset labels</button></div>
@@ -114,8 +114,11 @@ const PERSON_DEFAULTS = [
   { name: 'Person C', color: '#e05555' },
   { name: 'Person D', color: '#a855f5' },
   { name: 'Person E', color: '#f5a623' },
+  { name: 'Person F', color: '#ec4899' },
+  { name: 'Person G', color: '#14b8a6' },
+  { name: 'Person H', color: '#f97316' },
 ];
-const DEFAULT_POS = [0.2, 0.4, 0.55, 0.7, 0.85];
+const DEFAULT_POS = [0.15, 0.3, 0.43, 0.56, 0.69, 0.78, 0.87, 0.93];
 
 const DEFAULT_TRAITS = [
   ["Cooks","Orders takeout"],
@@ -130,7 +133,7 @@ const DEFAULT_TRAITS = [
 
 const traits = DEFAULT_TRAITS.map(p => [...p]);
 // positions[rowIndex][personIndex]
-const positions = traits.map(() => [0.2, 0.4, 0.55, 0.7, 0.85]);
+const positions = traits.map(() => [0.15, 0.3, 0.43, 0.56, 0.69, 0.78, 0.87, 0.93]);
 
 // persons state
 let numPersons = 2;
@@ -174,20 +177,36 @@ function drawCircle(pid) {
 
 /* ── CIRCLE SIZE ── */
 function getCircleSize() {
-  // 2=110, 3=90, 4=76, 5=64
-  return [110, 110, 90, 76, 64][numPersons - 1];
+  // 1-row: 2=110,3=90,4=76,5=64 | 2-row: 6=90,7=76,8=76
+  return [110, 110, 90, 76, 64, 90, 76, 76][numPersons - 1];
+}
+
+function getRowConfig() {
+  // returns { wrap: bool, justify: string }
+  return { wrap: numPersons >= 6, justify: numPersons >= 6 ? 'center' : 'center' };
 }
 
 function setCircleSize() {
   const sz = getCircleSize();
-  const iconSize = [28, 28, 24, 20, 16][numPersons - 1];
-  const nameSize = [12, 12, 11, 10, 9][numPersons - 1];
+  const iconSize = [28, 28, 24, 20, 16, 22, 20, 20][numPersons - 1];
+  const nameSize = [12, 12, 11, 10, 9, 11, 10, 10][numPersons - 1];
+  const row = document.getElementById('circlesRow');
+  // toggle wrap for 6+
+  row.style.flexWrap = numPersons >= 6 ? 'wrap' : 'nowrap';
+  // for 6: max 3 per row; for 7/8: max 4 per row
+  const perRow = numPersons === 6 ? 3 : 4;
+  document.querySelectorAll('.avatar-wrap').forEach((el, idx) => {
+    el.style.width = sz + 'px';
+    if (numPersons >= 6) {
+      // force row break by setting flex-basis so exactly perRow fit
+      el.style.flexBasis = `calc(${100/perRow}% - 10px)`;
+    } else {
+      el.style.flexBasis = '';
+    }
+  });
   document.querySelectorAll('.circle-container').forEach(el => {
     el.style.width = sz + 'px';
     el.style.height = sz + 'px';
-  });
-  document.querySelectorAll('.avatar-wrap').forEach(el => {
-    el.style.width = sz + 'px';
   });
   document.querySelectorAll('.upload-hint i').forEach(el => {
     el.style.fontSize = iconSize + 'px';
@@ -196,7 +215,7 @@ function setCircleSize() {
     el.style.fontSize = nameSize + 'px';
   });
   document.querySelectorAll('.zoom-controls input[type=range]').forEach(el => {
-    el.style.width = Math.max(56, sz - 16) + 'px';
+    el.style.width = Math.max(50, sz - 16) + 'px';
   });
 }
 
@@ -440,14 +459,14 @@ function attachDrag(sliderId, trackId, rowIndex, pid) {
 function updateAddRemoveBtns() {
   const addBtn = document.getElementById('addBtn');
   const removeBtn = document.getElementById('removeBtn');
-  addBtn.disabled = numPersons >= 5;
+  addBtn.disabled = numPersons >= 8;
   removeBtn.disabled = numPersons <= 2;
-  addBtn.textContent = numPersons >= 5 ? '＋ Max 5 people' : `＋ Add person (${numPersons}/5)`;
+  addBtn.textContent = numPersons >= 8 ? '＋ Max 8 people' : `＋ Add person (${numPersons}/8)`;
   removeBtn.textContent = `－ Remove last`;
 }
 
 document.getElementById('addBtn').addEventListener('click', () => {
-  if (numPersons >= 5) return;
+  if (numPersons >= 8) return;
   numPersons++;
   buildCircles();
   buildMeters();
@@ -511,9 +530,9 @@ document.getElementById('hexBg').addEventListener('blur', e => {
 
 /* ── SHIP NAME ── */
 document.getElementById('shipTitle').addEventListener('click', () => {
-  const val = prompt('Enter ship name:');
+  const val = prompt('Enter ship/group name:');
   if (val !== null) {
-    document.getElementById('shipTitle').innerHTML = `<span class="tap-hint">tap to edit</span>${val || '[Ship Name]'}`;
+    document.getElementById('shipTitle').innerHTML = `<span class="tap-hint">tap to edit</span>${val || '[Name]'}`;
   }
 });
 
