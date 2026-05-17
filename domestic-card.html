@@ -113,8 +113,9 @@ const PERSON_DEFAULTS = [
   { name: 'Person B', color: '#5bc4f5' },
   { name: 'Person C', color: '#e05555' },
   { name: 'Person D', color: '#a855f5' },
+  { name: 'Person E', color: '#f5a623' },
 ];
-const DEFAULT_POS = [0.25, 0.45, 0.6, 0.75];
+const DEFAULT_POS = [0.2, 0.4, 0.55, 0.7, 0.85];
 
 const DEFAULT_TRAITS = [
   ["Cooks","Orders takeout"],
@@ -129,7 +130,7 @@ const DEFAULT_TRAITS = [
 
 const traits = DEFAULT_TRAITS.map(p => [...p]);
 // positions[rowIndex][personIndex]
-const positions = traits.map(() => [0.25, 0.6, 0.35, 0.75]);
+const positions = traits.map(() => [0.2, 0.4, 0.55, 0.7, 0.85]);
 
 // persons state
 let numPersons = 2;
@@ -173,14 +174,14 @@ function drawCircle(pid) {
 
 /* ── CIRCLE SIZE ── */
 function getCircleSize() {
-  // 2 people=110, 3=90, 4=76
-  return [110, 110, 90, 76][numPersons - 1];
+  // 2=110, 3=90, 4=76, 5=64
+  return [110, 110, 90, 76, 64][numPersons - 1];
 }
 
 function setCircleSize() {
   const sz = getCircleSize();
-  const iconSize = [28, 28, 24, 20][numPersons - 1];
-  const nameSize = [12, 12, 11, 10][numPersons - 1];
+  const iconSize = [28, 28, 24, 20, 16][numPersons - 1];
+  const nameSize = [12, 12, 11, 10, 9][numPersons - 1];
   document.querySelectorAll('.circle-container').forEach(el => {
     el.style.width = sz + 'px';
     el.style.height = sz + 'px';
@@ -439,14 +440,14 @@ function attachDrag(sliderId, trackId, rowIndex, pid) {
 function updateAddRemoveBtns() {
   const addBtn = document.getElementById('addBtn');
   const removeBtn = document.getElementById('removeBtn');
-  addBtn.disabled = numPersons >= 4;
+  addBtn.disabled = numPersons >= 5;
   removeBtn.disabled = numPersons <= 2;
-  addBtn.textContent = numPersons >= 4 ? '＋ Max 4 people' : `＋ Add person (${numPersons}/4)`;
+  addBtn.textContent = numPersons >= 5 ? '＋ Max 5 people' : `＋ Add person (${numPersons}/5)`;
   removeBtn.textContent = `－ Remove last`;
 }
 
 document.getElementById('addBtn').addEventListener('click', () => {
-  if (numPersons >= 4) return;
+  if (numPersons >= 5) return;
   numPersons++;
   buildCircles();
   buildMeters();
