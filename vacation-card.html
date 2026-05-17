@@ -88,7 +88,7 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 </head>
 <body>
 <div id="card">
-  <div class="ship-title" id="shipTitle"><span class="tap-hint">tap to edit</span>[Name]</div>
+  <div class="ship-title" id="shipTitle"><span class="tap-hint">tap to edit</span>[Ship Name]</div>
   <div class="circles-row" id="circlesRow"></div>
   <div class="meters" id="metersContainer"></div>
   <div class="meter-hint export-hide">double-tap any label to edit &nbsp;·&nbsp; <button id="resetBtn">reset labels</button></div>
@@ -121,14 +121,14 @@ const PERSON_DEFAULTS = [
 const DEFAULT_POS = [0.15, 0.3, 0.43, 0.56, 0.69, 0.78, 0.87, 0.93];
 
 const DEFAULT_TRAITS = [
-  ["Plans the trip","Comes along"],
-  ["Driver","Passenger princess"],
-  ["Packs a week early","Packs last second"],
-  ["Navigator","Go where feet take me"],
-  ["Backpack only","Overweight baggage fee"],
-  ["Takes pictures","Lives in the moment"],
+  ["Plans the trip","Come along 🧳"],
+  ["Driver 🚗","Passenger princess 👑"],
+  ["Packs a week early","Packs last second 😅"],
+  ["Navigator 🗺️","Go where feet take me"],
+  ["Backpack only","Overweight baggage fee 💸"],
+  ["Takes pictures 📸","Lives in the moment"],
   ["Remembers chargers","Borrows yours the whole trip"],
-  ["Budget spreadsheet",'"We\'ll figure it out"'],
+  ["Budget spreadsheet 📊",'"We\'ll figure it out"'],
 ];
 
 const traits = DEFAULT_TRAITS.map(p => [...p]);
@@ -213,11 +213,11 @@ function buildCircles() {
     wrap.innerHTML = `
       <div class="circle-container" id="circ${pid}">
         <canvas id="canvas${pid}" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" class="circle-canvas"></canvas>
-        <div class="upload-hint" id="hint${pid}"><i class="ti ti-camera"></i></div>
+        <div class="upload-hint" id="hint${pid}" style="${p.image ? 'display:none;z-index:-1' : ''}"><i class="ti ti-camera"></i></div>
         <div class="circle-ring"></div>
         <input type="file" accept="image/*" class="circle-input" id="file${pid}">
       </div>
-      <div class="zoom-controls export-hide" id="zoomWrap${pid}" style="display:none">
+      <div class="zoom-controls export-hide" id="zoomWrap${pid}" style="${p.image ? 'display:flex' : 'display:none'}">
         <input type="range" min="1" max="4" step="0.01" value="${p.offset.zoom}" id="zoom${pid}">
         <label>zoom & drag</label>
       </div>
@@ -255,7 +255,9 @@ function setupCircle(pid) {
     img.onload = () => {
       p.image = img; p.offset = { x: 0, y: 0, zoom: 1 };
       document.getElementById(`zoomWrap${pid}`).style.display = 'flex';
-      document.getElementById(`hint${pid}`).style.display = 'none';
+      const hint = document.getElementById(`hint${pid}`);
+      hint.style.display = 'none';
+      hint.style.zIndex = '-1';
       const zoomEl = document.getElementById(`zoom${pid}`);
       if (zoomEl) zoomEl.value = 1;
       drawCircle(pid);
@@ -513,9 +515,9 @@ document.getElementById('hexBg').addEventListener('blur', e => {
 
 /* ── SHIP NAME ── */
 document.getElementById('shipTitle').addEventListener('click', () => {
-  const val = prompt('Enter ship/group name:');
+  const val = prompt('Enter ship name:');
   if (val !== null) {
-    document.getElementById('shipTitle').innerHTML = `<span class="tap-hint">tap to edit</span>${val || '[Name]'}`;
+    document.getElementById('shipTitle').innerHTML = `<span class="tap-hint">tap to edit</span>${val || '[Ship Name]'}`;
   }
 });
 
