@@ -84,11 +84,13 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 .add-btn:disabled, .remove-btn:disabled { opacity: 0.3; cursor: default; background: none !important; }
 .export-btn { display: block; width: 100%; padding: 11px; background: var(--btn-bg); color: var(--btn-fg); border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: 0.3px; margin-top: 4px; }
 .export-btn:active { opacity: 0.85; }
+.vacation-btn { display: block; text-align: center; margin-top: 10px; font-size: 12px; font-family: sans-serif; color: #aaa; text-decoration: none; padding: 4px; }
+.vacation-btn:hover { color: #888; }
 </style>
 </head>
 <body>
 <div id="card">
-  <div class="ship-title" id="shipTitle"><span class="tap-hint">tap to edit</span>[Name]</div>
+  <div class="ship-title" id="shipTitle"><span class="tap-hint">tap to edit</span>[Ship Name]</div>
   <div class="circles-row" id="circlesRow"></div>
   <div class="meters" id="metersContainer"></div>
   <div class="meter-hint export-hide">double-tap any label to edit &nbsp;·&nbsp; <button id="resetBtn">reset labels</button></div>
@@ -104,6 +106,7 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
     </div>
   </div>
   <button class="export-btn" id="exportBtn"><i class="ti ti-download"></i> Export as PNG</button>
+  <a href="https://yumetemplate.vercel.app/vacation-card.html" class="vacation-btn export-hide">Try the Vacation version</a>
 </div>
 
 <script>
@@ -530,9 +533,9 @@ document.getElementById('hexBg').addEventListener('blur', e => {
 
 /* ── SHIP NAME ── */
 document.getElementById('shipTitle').addEventListener('click', () => {
-  const val = prompt('Enter ship/group name:');
+  const val = prompt('Enter ship name:');
   if (val !== null) {
-    document.getElementById('shipTitle').innerHTML = `<span class="tap-hint">tap to edit</span>${val || '[Name]'}`;
+    document.getElementById('shipTitle').innerHTML = `<span class="tap-hint">tap to edit</span>${val || '[Ship Name]'}`;
   }
 });
 
