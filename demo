@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Basic</title>
+</head>
+<body>
+
+<!-- Circle -->
+<canvas id="canvas" width="110" height="110"></canvas>
+<br>
+<input type="file" accept="image/*" id="fileInput">
+<br>
+<input type="range" min="1" max="4" step="0.01" value="1" id="zoom">
+<br>
+
+<!-- Meter -->
+<div id="track" style="position:relative; width:300px; height:20px; border-bottom:1px solid black; margin-top:20px;">
+  <div id="indicator" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:14px; height:14px; border-radius:50%; background:black; cursor:grab;"></div>
+</div>
+
+<script>
+const CANVAS_SIZE = 110;
+let image = null;
+let offset = { x: 0, y: 0, zoom: 1 };
+let drag = { on: false, lx: 0, ly: 0 };
+let pos = 0.5;
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+function draw() {
+  ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(55, 55, 53, 0, Math.PI * 2);
+  ctx.clip();
+  if (image) {
+    const scale = Math.min(CANVAS_SIZE / image.width, CANVAS_SIZE / image.height) * offset.zoom;
+    const w = image.width * scale, h = image.height * scale;
+    ctx.drawImage(image, (CANVAS_SIZE - w) / 2 + offset.x, (CANVAS_SIZE - h) / 2 + offset.y, w, h);
+  } else {
+    ctx.fillStyle = '#eee';
+    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+  }
+  ctx.restore();
+  // draw circle border
+  ctx.beginPath();
+  ctx.arc(55, 55, 53, 0, Math.PI * 2);
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+draw();
+
+document.getElementById('fileInput').addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  const img = new Image();
+  img.onload = () => { image = img; offset = { x: 0, y: 0, zoom: 1 }; draw(); };
+  img.src = URL.createObjectURL(file);
+});
+
+document.getElementById('zoom').addEventListener('input', e => {
+  offset.zoom = parseFloat(e.target.value); draw();
+});
+
+// drag to pan image
+canvas.addEventListener('mousedown', e => { if (!image) return; drag.on = true; drag.lx = e.clientX; drag.ly = e.clientY; });
+canvas.addEventListener('touchstart', e => { if (!image) return; drag.on = true; drag.lx = e.touches[0].clientX; drag.ly = e.touches[0].clientY; }, { passive: true });
+document.addEventListener('mousemove', e => {
+  if (!drag.on) return;
+  offset.x += e.clientX - drag.lx; offset.y += e.clientY - drag.ly;
+  drag.lx = e.clientX; drag.ly = e.clientY; draw();
+});
+document.addEventListener('touchmove', e => {
+  if (!drag.on) return;
+  offset.x += e.touches[0].clientX - drag.lx; offset.y += e.touches[0].clientY - drag.ly;
+  drag.lx = e.touches[0].clientX; drag.ly = e.touches[0].clientY; draw();
+}, { passive: true });
+document.addEventListener('mouseup', () => { drag.on = false; });
+document.addEventListener('touchend', () => { drag.on = false; });
+
+// meter drag
+const track = document.getElementById('track');
+const indicator = document.getElementById('indicator');
+let meterDrag = false;
+
+indicator.addEventListener('mousedown', e => { meterDrag = true; e.preventDefault(); });
+indicator.addEventListener('touchstart', e => { meterDrag = true; }, { passive: true });
+document.addEventListener('mousemove', e => {
+  if (!meterDrag) return;
+  const rect = track.getBoundingClientRect();
+  pos = Math.max(0.02, Math.min(0.98, (e.clientX - rect.left) / rect.width));
+  indicator.style.left = (pos * 100) + '%';
+});
+document.addEventListener('touchmove', e => {
+  if (!meterDrag) return;
+  const rect = track.getBoundingClientRect();
+  pos = Math.max(0.02, Math.min(0.98, (e.touches[0].clientX - rect.left) / rect.width));
+  indicator.style.left = (pos * 100) + '%';
+}, { passive: true });
+document.addEventListener('mouseup', () => { meterDrag = false; });
+document.addEventListener('touchend', () => { meterDrag = false; });
+</script>
+</body>
+</html>
