@@ -3,12 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Couples Compatibility Card</title>
+<title>Vacation Compatibility Card</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: center; padding: 20px; font-family: Georgia, serif; }
+body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: center; padding: 20px; font-family: 'Inter', sans-serif; }
 #card {
   background: white; border-radius: 20px; border: 1.5px solid #f0e0d0;
   padding: 16px 14px 20px; width: 100%; max-width: 480px; height: fit-content;
@@ -53,7 +56,7 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 /* char name */
 .char-name { font-size: 12px; font-weight: 700; color: var(--fg); text-align: center; margin-top: 4px; cursor: default; border-radius: 4px; padding: 1px 4px; min-width: 56px; }
 .char-name.editing-active { outline: 1.5px dashed var(--fg-hint); background: rgba(128,128,128,0.08); cursor: text; }
-.char-name input.name-input { width: 100%; font-size: 12px; font-weight: 700; color: var(--fg); border: none; background: transparent; outline: none; font-family: Georgia, serif; text-align: center; padding: 0; }
+.char-name input.name-input { width: 100%; font-size: 12px; font-weight: 700; color: var(--fg); border: none; background: transparent; outline: none; font-family: 'Inter', sans-serif; text-align: center; padding: 0; }
 
 /* meters */
 .meters { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
@@ -61,7 +64,7 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 .meter-label { font-size: 11px; font-weight: 600; color: var(--fg-sub); text-align: right; flex: 0 0 78px; line-height: 1.2; cursor: default; border-radius: 4px; padding: 1px 2px; }
 .meter-label.right { text-align: left; }
 .meter-label.editing-active { outline: 1.5px dashed var(--fg-hint); background: rgba(128,128,128,0.08); cursor: text; }
-.meter-label input.label-input { width: 100%; font-size: 11px; font-weight: 600; color: var(--fg-sub); border: none; background: transparent; outline: none; font-family: Georgia, serif; text-align: right; padding: 0; }
+.meter-label input.label-input { width: 100%; font-size: 11px; font-weight: 600; color: var(--fg-sub); border: none; background: transparent; outline: none; font-family: 'Inter', sans-serif; text-align: right; padding: 0; }
 .meter-label.right input.label-input { text-align: left; }
 .meter-track { flex: 1; position: relative; height: 20px; display: flex; align-items: center; }
 .meter-line { width: 100%; height: 2px; background: var(--line); border-radius: 2px; position: absolute; }
@@ -84,11 +87,11 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 .add-btn:disabled, .remove-btn:disabled { opacity: 0.3; cursor: default; background: none !important; }
 .export-btn { display: block; width: 100%; padding: 11px; background: var(--btn-bg); color: var(--btn-fg); border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: 0.3px; margin-top: 4px; }
 .export-btn:active { opacity: 0.85; }
-.vacation-btn { display: block; text-align: center; margin-top: 10px; font-size: 12px; font-family: sans-serif; color: #aaa; text-decoration: none; padding: 4px; }
-.vacation-btn:hover { color: #888; }
 .contact-row { text-align: center; margin-top: 6px; font-size: 11px; font-family: sans-serif; color: #bbb; }
 .contact-row a { color: #aaa; text-decoration: none; border-bottom: 1px dashed #ccc; }
 .contact-row a:hover { color: #888; }
+.vacation-btn { display: block; text-align: center; margin-top: 10px; font-size: 12px; font-family: sans-serif; color: #aaa; text-decoration: none; padding: 4px; }
+.vacation-btn:hover { color: #888; }
 </style>
 </head>
 <body>
@@ -109,7 +112,7 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
     </div>
   </div>
   <button class="export-btn" id="exportBtn"><i class="ti ti-download"></i> Export as PNG</button>
-  <a href="https://yumetemplate.vercel.app/vacation-card.html" class="vacation-btn export-hide">Try the Vacation version</a>
+  <a href="https://yumetemplate.vercel.app/domestic-card.html" class="vacation-btn export-hide">Try the domestic version</a>
   <div class="contact-row export-hide">
     bugs? contact via
     <a href="https://x.com/0xvltt" target="_blank">X @0xvltt</a>
@@ -189,13 +192,7 @@ function drawCircle(pid) {
 
 /* ── CIRCLE SIZE ── */
 function getCircleSize() {
-  // 1-row: 2=110,3=90,4=76,5=64 | 2-row: 6=90,7=76,8=76
   return [110, 110, 90, 76, 64, 90, 76, 76][numPersons - 1];
-}
-
-function getRowConfig() {
-  // returns { wrap: bool, justify: string }
-  return { wrap: numPersons >= 6, justify: numPersons >= 6 ? 'center' : 'center' };
 }
 
 function setCircleSize() {
@@ -203,29 +200,18 @@ function setCircleSize() {
   const iconSize = [28, 28, 24, 20, 16, 22, 20, 20][numPersons - 1];
   const nameSize = [12, 12, 11, 10, 9, 11, 10, 10][numPersons - 1];
   const row = document.getElementById('circlesRow');
-  // toggle wrap for 6+
   row.style.flexWrap = numPersons >= 6 ? 'wrap' : 'nowrap';
-  // for 6: max 3 per row; for 7/8: max 4 per row
   const perRow = numPersons === 6 ? 3 : 4;
-  document.querySelectorAll('.avatar-wrap').forEach((el, idx) => {
+  document.querySelectorAll('.avatar-wrap').forEach(el => {
     el.style.width = sz + 'px';
-    if (numPersons >= 6) {
-      // force row break by setting flex-basis so exactly perRow fit
-      el.style.flexBasis = `calc(${100/perRow}% - 10px)`;
-    } else {
-      el.style.flexBasis = '';
-    }
+    el.style.flexBasis = numPersons >= 6 ? `calc(${100/perRow}% - 10px)` : '';
   });
   document.querySelectorAll('.circle-container').forEach(el => {
     el.style.width = sz + 'px';
     el.style.height = sz + 'px';
   });
-  document.querySelectorAll('.upload-hint i').forEach(el => {
-    el.style.fontSize = iconSize + 'px';
-  });
-  document.querySelectorAll('.char-name').forEach(el => {
-    el.style.fontSize = nameSize + 'px';
-  });
+  document.querySelectorAll('.upload-hint i').forEach(el => { el.style.fontSize = iconSize + 'px'; });
+  document.querySelectorAll('.char-name').forEach(el => { el.style.fontSize = nameSize + 'px'; });
   document.querySelectorAll('.zoom-controls input[type=range]').forEach(el => {
     el.style.width = Math.max(50, sz - 16) + 'px';
   });
