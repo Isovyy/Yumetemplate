@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vacation Compatibility Card</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: center; padding: 20px; font-family: 'DM Sans', sans-serif; }
+#card {
+  background: white; border-radius: 20px; border: 1.5px solid #f0e0d0;
+  padding: 16px 14px 20px; width: 100%; max-width: 480px; height: fit-content;
+  --fg: #2a2a2a; --fg-sub: #333; --fg-hint: #aaa; --line: #ddd;
+  --btn-bg: #2a2a2a; --btn-fg: #ffffff; --hex-border: #ddd; --hex-fg: #333;
+}
+.ship-title { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 14px; color: var(--fg); letter-spacing: -0.3px; cursor: pointer; }
+.ship-title .tap-hint { color: var(--fg-hint); font-weight: 400; font-size: 14px; display: block; }
+.exporting .tap-hint { display: none !important; }
+
+/* circles */
+.circles-row { display: flex; justify-content: center; align-items: flex-start; flex-wrap: nowrap; gap: 10px; margin-bottom: 20px; }
+.avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+.circle-container { position: relative; cursor: pointer; flex-shrink: 0; }
+.circle-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; }
+.circle-ring { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; border: 3.5px solid #1a1a1a; pointer-events: none; z-index: 10; }
+.upload-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; z-index: 5; pointer-events: none; }
+.upload-hint i { font-size: 26px; color: #bbb; }
+.circle-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 8; border-radius: 50%; }
+
+/* export show/hide */
+.export-hide { transition: opacity 0.15s; }
+.exporting .export-hide { visibility: hidden !important; height: 0 !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important; min-height: 0 !important; }
+.export-only { display: none; }
+.exporting .export-only { display: block !important; }
+
+/* color pickers */
+.color-picker-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.color-picker-wrap label { font-size: 10px; color: var(--fg-hint); }
+.color-picker-row { display: flex; align-items: center; gap: 5px; }
+.color-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #ccc; cursor: pointer; position: relative; overflow: hidden; flex-shrink: 0; }
+.color-dot input[type=color] { position: absolute; inset: -6px; opacity: 0; cursor: pointer; width: 150%; height: 150%; }
+.hex-input { width: 64px; font-size: 11px; font-family: monospace; border: 1px solid var(--hex-border, #ddd); border-radius: 6px; padding: 3px 5px; color: var(--hex-fg, #333); background: transparent; outline: none; text-transform: uppercase; }
+.hex-input:focus { border-color: #bbb; }
+.hex-input.invalid { border-color: #f0a0a0; color: #c00; }
+
+/* zoom controls */
+.zoom-controls { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.zoom-controls label { font-size: 9px; color: var(--fg-hint); }
+.zoom-controls input[type=range] { width: 72px; }
+
+/* char name */
+.char-name { font-size: 12px; font-weight: 700; color: var(--fg); text-align: center; margin-top: 4px; cursor: default; border-radius: 4px; padding: 1px 4px; min-width: 56px; }
+.char-name.editing-active { outline: 1.5px dashed var(--fg-hint); background: rgba(128,128,128,0.08); cursor: text; }
+.char-name input.name-input { width: 100%; font-size: 12px; font-weight: 700; color: var(--fg); border: none; background: transparent; outline: none; font-family: 'DM Sans', sans-serif; text-align: center; padding: 0; }
+
+/* meters */
+.meters { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.meter-row { display: flex; align-items: center; gap: 6px; }
+.meter-label { font-size: 11px; font-weight: 600; color: var(--fg-sub); text-align: right; flex: 0 0 78px; line-height: 1.2; cursor: default; border-radius: 4px; padding: 1px 2px; }
+.meter-label.right { text-align: left; }
+.meter-label.editing-active { outline: 1.5px dashed var(--fg-hint); background: rgba(128,128,128,0.08); cursor: text; }
+.meter-label input.label-input { width: 100%; font-size: 11px; font-weight: 600; color: var(--fg-sub); border: none; background: transparent; outline: none; font-family: 'DM Sans', sans-serif; text-align: right; padding: 0; }
+.meter-label.right input.label-input { text-align: left; }
+.meter-track { flex: 1; position: relative; height: 20px; display: flex; align-items: center; }
+.meter-line { width: 100%; height: 2px; background: var(--line); border-radius: 2px; position: absolute; }
+.heart-slider { position: absolute; width: 20px; height: 20px; cursor: grab; transform: translateX(-50%); top: 50%; margin-top: -10px; z-index: 5; user-select: none; touch-action: none; }
+.heart-slider:active { cursor: grabbing; }
+.heart-slider svg { width: 20px; height: 20px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.18)); }
+
+/* controls row */
+.meter-hint { text-align: center; font-size: 11px; color: var(--fg-hint); margin-bottom: 8px; font-family: 'DM Sans', sans-serif; }
+.meter-hint button { background: none; border: 1px solid var(--fg-hint); border-radius: 6px; font-size: 11px; color: var(--fg-hint); cursor: pointer; padding: 2px 8px; font-family: 'DM Sans', sans-serif; }
+.meter-hint button:hover { background: rgba(128,128,128,0.15); }
+.controls-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.bg-picker-label { font-size: 11px; color: var(--fg-hint); font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+.person-btns { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
+.add-btn, .remove-btn { font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; border-radius: 8px; padding: 5px 14px; border: 1.5px solid; font-weight: 600; transition: background 0.15s; }
+.add-btn { background: none; border-color: #a8c97f; color: #5a8a2a; }
+.add-btn:hover { background: rgba(168,201,127,0.2); }
+.remove-btn { background: none; border-color: #f0a0a0; color: #c04040; }
+.remove-btn:hover { background: rgba(240,160,160,0.2); }
+.add-btn:disabled, .remove-btn:disabled { opacity: 0.3; cursor: default; background: none !important; }
+.export-btn { display: block; width: 100%; padding: 11px; background: var(--btn-bg); color: var(--btn-fg); border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: 0.3px; margin-top: 4px; }
+.export-btn:active { opacity: 0.85; }
+.contact-row { text-align: center; margin-top: 6px; font-size: 11px; font-family: 'DM Sans', sans-serif; color: #bbb; }
+.contact-row a { color: #aaa; text-decoration: none; border-bottom: 1px dashed #ccc; }
+.contact-row a:hover { color: #888; }
+.vacation-btn { display: block; text-align: center; margin-top: 10px; font-size: 12px; font-family: 'DM Sans', sans-serif; color: #aaa; text-decoration: none; padding: 4px; }
+.vacation-btn:hover { color: #888; }
+</style>
+</head>
+<body>
+<div id="card">
+  <div class="ship-title" id="shipTitle"><span class="tap-hint">tap to edit</span>[Name]</div>
+  <div class="circles-row" id="circlesRow"></div>
+  <div class="meters" id="metersContainer"></div>
+  <div class="meter-hint export-hide">double-tap any label to edit &nbsp;·&nbsp; <button id="resetBtn">reset labels</button></div>
+  <div class="person-btns export-hide">
+    <button class="add-btn" id="addBtn">＋ Add person</button>
+    <button class="remove-btn" id="removeBtn">－ Remove last</button>
+  </div>
+  <div class="controls-row export-hide">
+    <span class="bg-picker-label">card background</span>
+    <div class="color-picker-row">
+      <div class="color-dot" id="dotBg" style="background:#ffffff"><input type="color" id="colorBg" value="#ffffff"></div>
+      <input type="text" class="hex-input" id="hexBg" value="#FFFFFF" maxlength="7">
+    </div>
+  </div>
+  <button class="export-btn" id="exportBtn"><i class="ti ti-download"></i> Export as PNG</button>
+  <a href="https://yumetemplate.vercel.app/domestic-card.html" class="vacation-btn export-hide">Try the domestic version</a>
+  <div class="contact-row export-hide">
+    bugs? contact via
+    <a href="https://x.com/0xvltt" target="_blank">X @0xvltt</a>
+    or
+    <a href="https://0xvltt.straw.page" target="_blank">anonymously</a>
+  </div>
+</div>
+
+<script>
+const CANVAS_SIZE = 440;
+const PERSON_DEFAULTS = [
+  { name: 'Person A', color: '#a8c97f' },
+  { name: 'Person B', color: '#5bc4f5' },
+  { name: 'Person C', color: '#e05555' },
+  { name: 'Person D', color: '#a855f5' },
+  { name: 'Person E', color: '#f5a623' },
+  { name: 'Person F', color: '#ec4899' },
+  { name: 'Person G', color: '#14b8a6' },
+  { name: 'Person H', color: '#f97316' },
+];
+const DEFAULT_POS = [0.15, 0.3, 0.43, 0.56, 0.69, 0.78, 0.87, 0.93];
+
+const DEFAULT_TRAITS = [
+  ["Plans the trip","Come along"],
+  ["Driver","Passenger princess"],
+  ["Packs a week early","Packs last second"],
+  ["Navigator","Go where feet take me"],
+  ["Backpack only","Overweight baggage fee"],
+  ["Takes pictures","Lives in the moment"],
+  ["Remembers chargers","Borrows yours the whole trip"],
+  ["Budget spreadsheet",'"We\'ll figure it out"'],
+];
+
+const traits = DEFAULT_TRAITS.map(p => [...p]);
+// positions[rowIndex][personIndex]
+const positions = traits.map(() => [0.15, 0.3, 0.43, 0.56, 0.69, 0.78, 0.87, 0.93]);
+
+// persons state
+let numPersons = 2;
+const persons = PERSON_DEFAULTS.map((p, i) => ({
+  id: i,
+  name: p.name,
+  color: p.color,
+  image: null,
+  offset: { x: 0, y: 0, zoom: 1 },
+  drag: { on: false, lx: 0, ly: 0 },
+}));
+
+function heartSVG(color, size=20) {
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="${color}" stroke="#1a1a1a" stroke-width="1.5"/></svg>`;
+}
+
+function isValidHex(val) { return /^#[0-9A-Fa-f]{6}$/.test(val); }
+
+/* ── DRAW CIRCLE ── */
+function drawCircle(pid) {
+  const canvas = document.getElementById(`canvas${pid}`);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const S = CANVAS_SIZE, R = S / 2;
+  ctx.clearRect(0, 0, S, S);
+  ctx.save();
+  ctx.beginPath(); ctx.arc(R, R, R - 2, 0, Math.PI * 2); ctx.clip();
+  const p = persons[pid];
+  if (p.image) {
+    const sc = Math.min(S / p.image.width, S / p.image.height) * p.offset.zoom;
+    const w = p.image.width * sc, h = p.image.height * sc;
+    ctx.drawImage(p.image, (S-w)/2 + p.offset.x, (S-h)/2 + p.offset.y, w, h);
+  } else {
+    ctx.fillStyle = '#f0f0f0'; ctx.fillRect(0, 0, S, S);
+    ctx.fillStyle = '#ddd';
+    ctx.beginPath(); ctx.arc(R, R*0.76, R*0.33, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(R, R*1.36, R*0.51, R*0.36, 0, 0, Math.PI); ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* ── CIRCLE SIZE ── */
+function getCircleSize() {
+  return [110, 110, 90, 76, 64, 90, 76, 76][numPersons - 1];
+}
+
+function setCircleSize() {
+  const sz = getCircleSize();
+  const iconSize = [28, 28, 24, 20, 16, 22, 20, 20][numPersons - 1];
+  const nameSize = [12, 12, 11, 10, 9, 11, 10, 10][numPersons - 1];
+  const row = document.getElementById('circlesRow');
+  row.style.flexWrap = numPersons >= 6 ? 'wrap' : 'nowrap';
+  const perRow = numPersons === 6 ? 3 : 4;
+  document.querySelectorAll('.avatar-wrap').forEach(el => {
+    el.style.width = sz + 'px';
+    el.style.flexBasis = numPersons >= 6 ? `calc(${100/perRow}% - 10px)` : '';
+  });
+  document.querySelectorAll('.circle-container').forEach(el => {
+    el.style.width = sz + 'px';
+    el.style.height = sz + 'px';
+  });
+  document.querySelectorAll('.upload-hint i').forEach(el => { el.style.fontSize = iconSize + 'px'; });
+  document.querySelectorAll('.char-name').forEach(el => { el.style.fontSize = nameSize + 'px'; });
+  document.querySelectorAll('.zoom-controls input[type=range]').forEach(el => {
+    el.style.width = Math.max(50, sz - 16) + 'px';
+  });
+}
+
+/* ── BUILD CIRCLES ── */
+function buildCircles() {
+  const row = document.getElementById('circlesRow');
+  row.innerHTML = '';
+  for (let pid = 0; pid < numPersons; pid++) {
+    const p = persons[pid];
+    const wrap = document.createElement('div');
+    wrap.className = 'avatar-wrap';
+    wrap.innerHTML = `
+      <div class="circle-container" id="circ${pid}">
+        <canvas id="canvas${pid}" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" class="circle-canvas"></canvas>
+        <div class="upload-hint" id="hint${pid}" style="${p.image ? 'display:none;z-index:-1' : ''}"><i class="ti ti-camera"></i></div>
+        <div class="circle-ring"></div>
+        <input type="file" accept="image/*" class="circle-input" id="file${pid}">
+      </div>
+      <div class="zoom-controls export-hide" id="zoomWrap${pid}" style="${p.image ? 'display:flex' : 'display:none'}">
+        <input type="range" min="1" max="4" step="0.01" value="${p.offset.zoom}" id="zoom${pid}">
+        <label>zoom & drag</label>
+      </div>
+      <div class="char-name" id="name${pid}">${p.name}</div>
+      <div class="export-only" id="heartBadge${pid}" style="margin-top:2px">
+        <svg id="heartSvg${pid}" viewBox="0 0 24 24" width="26" height="26" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="${p.color}" stroke="#1a1a1a" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div class="color-picker-wrap export-hide">
+        <div class="color-picker-row">
+          <div class="color-dot" id="dot${pid}" style="background:${p.color}">
+            <input type="color" id="color${pid}" value="${p.color}">
+          </div>
+          <input type="text" class="hex-input" id="hex${pid}" value="${p.color.toUpperCase()}" maxlength="7">
+        </div>
+        <label>heart color</label>
+      </div>`;
+    row.appendChild(wrap);
+    drawCircle(pid);
+    setupCircle(pid);
+    setupColorPicker(pid);
+    makeNameEditable(document.getElementById(`name${pid}`), p.name, pid);
+  }
+  setCircleSize();
+  updateAddRemoveBtns();
+}
+
+function setupCircle(pid) {
+  const p = persons[pid];
+
+  document.getElementById(`file${pid}`).addEventListener('change', e => {
+    const file = e.target.files[0]; if (!file) return;
+    const img = new Image();
+    img.onload = () => {
+      p.image = img; p.offset = { x: 0, y: 0, zoom: 1 };
+      document.getElementById(`zoomWrap${pid}`).style.display = 'flex';
+      const hint = document.getElementById(`hint${pid}`);
+      hint.style.display = 'none';
+      hint.style.zIndex = '-1';
+      const zoomEl = document.getElementById(`zoom${pid}`);
+      if (zoomEl) zoomEl.value = 1;
+      drawCircle(pid);
+    };
+    img.src = URL.createObjectURL(file);
+  });
+
+  document.getElementById(`zoom${pid}`).addEventListener('input', e => {
+    p.offset.zoom = parseFloat(e.target.value); drawCircle(pid);
+  });
+
+  const circ = document.getElementById(`circ${pid}`);
+  circ.addEventListener('mousedown', e => {
+    if (!p.image) return; p.drag.on = true; p.drag.lx = e.clientX; p.drag.ly = e.clientY; e.preventDefault();
+  });
+  circ.addEventListener('touchstart', e => {
+    if (!p.image) return; p.drag.on = true; p.drag.lx = e.touches[0].clientX; p.drag.ly = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('mousemove', e => {
+    if (!p.drag.on) return;
+    const sz = getCircleSize();
+    const RATIO = CANVAS_SIZE / sz;
+    p.offset.x += (e.clientX - p.drag.lx) * RATIO; p.offset.y += (e.clientY - p.drag.ly) * RATIO;
+    p.drag.lx = e.clientX; p.drag.ly = e.clientY; drawCircle(pid);
+  });
+  document.addEventListener('touchmove', e => {
+    if (!p.drag.on) return;
+    const sz = getCircleSize();
+    const RATIO = CANVAS_SIZE / sz;
+    p.offset.x += (e.touches[0].clientX - p.drag.lx) * RATIO; p.offset.y += (e.touches[0].clientY - p.drag.ly) * RATIO;
+    p.drag.lx = e.touches[0].clientX; p.drag.ly = e.touches[0].clientY; drawCircle(pid);
+  }, { passive: true });
+  document.addEventListener('mouseup', () => { p.drag.on = false; });
+  document.addEventListener('touchend', () => { p.drag.on = false; });
+}
+
+/* ── COLOR PICKER ── */
+function applyPersonColor(pid, hex) {
+  const color = hex.startsWith('#') ? hex : '#' + hex;
+  persons[pid].color = color;
+  const dot = document.getElementById(`dot${pid}`);
+  const picker = document.getElementById(`color${pid}`);
+  const hexEl = document.getElementById(`hex${pid}`);
+  const badge = document.getElementById(`heartSvg${pid}`);
+  if (dot) dot.style.background = color;
+  if (picker) picker.value = color;
+  if (hexEl) hexEl.value = color.toUpperCase();
+  if (badge) badge.querySelector('path').setAttribute('fill', color);
+  // update all meter hearts for this person
+  traits.forEach((_, i) => {
+    const hs = document.getElementById(`hs${pid}_${i}`);
+    if (hs) hs.innerHTML = heartSVG(color);
+  });
+}
+
+function setupColorPicker(pid) {
+  document.getElementById(`color${pid}`).addEventListener('input', e => applyPersonColor(pid, e.target.value));
+  const hexEl = document.getElementById(`hex${pid}`);
+  hexEl.addEventListener('input', e => {
+    const val = e.target.value.startsWith('#') ? e.target.value : '#' + e.target.value;
+    e.target.classList.toggle('invalid', !isValidHex(val));
+    if (isValidHex(val)) applyPersonColor(pid, val);
+  });
+  hexEl.addEventListener('blur', e => {
+    const val = e.target.value.startsWith('#') ? e.target.value : '#' + e.target.value;
+    if (!isValidHex(val)) { e.target.value = persons[pid].color.toUpperCase(); e.target.classList.remove('invalid'); }
+  });
+}
+
+/* ── NAME EDITABLE ── */
+function makeNameEditable(el, defaultName, pid) {
+  let tapTimer = null;
+  function activate() {
+    if (el.classList.contains('editing-active')) return;
+    el.classList.add('editing-active');
+    const input = document.createElement('input');
+    input.type = 'text'; input.className = 'name-input';
+    input.value = persons[pid].name;
+    el.textContent = ''; el.appendChild(input);
+    input.focus(); input.select();
+    function save() {
+      const val = input.value.trim() || defaultName;
+      persons[pid].name = val;
+      el.classList.remove('editing-active');
+      el.textContent = val;
+      makeNameEditable(el, defaultName, pid);
+    }
+    input.addEventListener('blur', save);
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') input.blur();
+      if (e.key === 'Escape') { input.value = persons[pid].name; input.blur(); }
+    });
+  }
+  el.addEventListener('click', () => {
+    if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; activate(); }
+    else { tapTimer = setTimeout(() => { tapTimer = null; }, 300); }
+  });
+  el.addEventListener('dblclick', activate);
+}
+
+/* ── METERS ── */
+function makeLabelEditable(el, rowIndex, side) {
+  let tapTimer = null;
+  el.addEventListener('click', () => {
+    if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; enterEdit(el, rowIndex, side); }
+    else { tapTimer = setTimeout(() => { tapTimer = null; }, 300); }
+  });
+  el.addEventListener('dblclick', () => enterEdit(el, rowIndex, side));
+}
+
+function enterEdit(el, rowIndex, side) {
+  if (el.classList.contains('editing-active')) return;
+  el.classList.add('editing-active');
+  const input = document.createElement('input');
+  input.type = 'text'; input.className = 'label-input'; input.value = traits[rowIndex][side];
+  el.textContent = ''; el.appendChild(input); input.focus(); input.select();
+  function save() {
+    const val = input.value.trim() || DEFAULT_TRAITS[rowIndex][side];
+    traits[rowIndex][side] = val;
+    el.classList.remove('editing-active'); el.textContent = val;
+    makeLabelEditable(el, rowIndex, side);
+  }
+  input.addEventListener('blur', save);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') input.blur();
+    if (e.key === 'Escape') { input.value = traits[rowIndex][side]; input.blur(); }
+  });
+}
+
+function buildMeters() {
+  const container = document.getElementById('metersContainer');
+  container.innerHTML = '';
+  traits.forEach((pair, i) => {
+    const row = document.createElement('div');
+    row.className = 'meter-row';
+    let hearts = '';
+    for (let pid = 0; pid < numPersons; pid++) {
+      hearts += `<div class="heart-slider" id="hs${pid}_${i}" style="left:${positions[i][pid]*100}%">${heartSVG(persons[pid].color)}</div>`;
+    }
+    row.innerHTML = `
+      <div class="meter-label" id="labelL${i}">${pair[0]}</div>
+      <div class="meter-track" id="track${i}">
+        <div class="meter-line"></div>
+        ${hearts}
+      </div>
+      <div class="meter-label right" id="labelR${i}">${pair[1]}</div>`;
+    container.appendChild(row);
+  });
+  traits.forEach((_, i) => {
+    makeLabelEditable(document.getElementById(`labelL${i}`), i, 0);
+    makeLabelEditable(document.getElementById(`labelR${i}`), i, 1);
+    for (let pid = 0; pid < numPersons; pid++) {
+      attachDrag(`hs${pid}_${i}`, `track${i}`, i, pid);
+    }
+  });
+}
+
+function attachDrag(sliderId, trackId, rowIndex, pid) {
+  const el = document.getElementById(sliderId);
+  if (!el) return;
+  let active = false;
+  function getPos(clientX) {
+    const rect = document.getElementById(trackId).getBoundingClientRect();
+    return Math.max(0.02, Math.min(0.98, (clientX - rect.left) / rect.width));
+  }
+  el.addEventListener('mousedown', e => { active = true; el.style.zIndex = 10; e.preventDefault(); });
+  el.addEventListener('touchstart', e => { active = true; e.preventDefault(); }, { passive: false });
+  document.addEventListener('mousemove', e => {
+    if (!active) return;
+    positions[rowIndex][pid] = getPos(e.clientX);
+    el.style.left = (positions[rowIndex][pid] * 100) + '%';
+  });
+  document.addEventListener('touchmove', e => {
+    if (!active) return;
+    positions[rowIndex][pid] = getPos(e.touches[0].clientX);
+    el.style.left = (positions[rowIndex][pid] * 100) + '%';
+    e.preventDefault();
+  }, { passive: false });
+  document.addEventListener('mouseup', () => { active = false; });
+  document.addEventListener('touchend', () => { active = false; });
+}
+
+/* ── ADD / REMOVE ── */
+function updateAddRemoveBtns() {
+  const addBtn = document.getElementById('addBtn');
+  const removeBtn = document.getElementById('removeBtn');
+  addBtn.disabled = numPersons >= 8;
+  removeBtn.disabled = numPersons <= 1;
+  addBtn.textContent = numPersons >= 8 ? '＋ Max 8 people' : `＋ Add person (${numPersons}/8)`;
+  removeBtn.textContent = `－ Remove last`;
+}
+
+document.getElementById('addBtn').addEventListener('click', () => {
+  if (numPersons >= 8) return;
+  numPersons++;
+  buildCircles();
+  buildMeters();
+  applyBgColor(document.getElementById('colorBg').value);
+});
+
+document.getElementById('removeBtn').addEventListener('click', () => {
+  if (numPersons <= 1) return;
+  numPersons--;
+  buildCircles();
+  buildMeters();
+  applyBgColor(document.getElementById('colorBg').value);
+});
+
+/* ── RESET LABELS ── */
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (!confirm('Reset all labels to default?')) return;
+  DEFAULT_TRAITS.forEach((pair, i) => { traits[i][0] = pair[0]; traits[i][1] = pair[1]; });
+  buildMeters();
+  applyBgColor(document.getElementById('colorBg').value);
+});
+
+/* ── BG COLOR ── */
+function hexToRgb(hex) {
+  const h = hex.replace('#','');
+  return { r: parseInt(h.slice(0,2),16), g: parseInt(h.slice(2,4),16), b: parseInt(h.slice(4,6),16) };
+}
+function isDark(hex) {
+  const { r, g, b } = hexToRgb(hex);
+  return (0.299*r + 0.587*g + 0.114*b) < 128;
+}
+function applyBgColor(hex) {
+  const color = hex.startsWith('#') ? hex : '#' + hex;
+  const dark = isDark(color);
+  const card = document.getElementById('card');
+  card.style.background = color;
+  card.style.borderColor = dark ? '#555' : '#f0e0d0';
+  card.style.setProperty('--fg',         dark ? '#f0f0f0' : '#2a2a2a');
+  card.style.setProperty('--fg-sub',     dark ? '#cccccc' : '#333333');
+  card.style.setProperty('--fg-hint',    dark ? '#999999' : '#aaaaaa');
+  card.style.setProperty('--line',       dark ? '#666666' : '#dddddd');
+  card.style.setProperty('--btn-bg',     dark ? '#f0f0f0' : '#2a2a2a');
+  card.style.setProperty('--btn-fg',     dark ? '#1a1a1a' : '#ffffff');
+  card.style.setProperty('--hex-border', dark ? '#666'    : '#ddd');
+  card.style.setProperty('--hex-fg',     dark ? '#eee'    : '#333');
+  document.getElementById('dotBg').style.background = color;
+  document.getElementById('colorBg').value = color;
+  document.getElementById('hexBg').value = color.toUpperCase();
+}
+
+document.getElementById('colorBg').addEventListener('input', e => applyBgColor(e.target.value));
+document.getElementById('hexBg').addEventListener('input', e => {
+  const val = e.target.value.startsWith('#') ? e.target.value : '#' + e.target.value;
+  e.target.classList.toggle('invalid', !isValidHex(val));
+  if (isValidHex(val)) applyBgColor(val);
+});
+document.getElementById('hexBg').addEventListener('blur', e => {
+  const val = e.target.value.startsWith('#') ? e.target.value : '#' + e.target.value;
+  if (!isValidHex(val)) { e.target.value = document.getElementById('colorBg').value.toUpperCase(); e.target.classList.remove('invalid'); }
+});
+
+/* ── SHIP NAME ── */
+document.getElementById('shipTitle').addEventListener('click', () => {
+  const val = prompt('Enter (ship/group) name:');
+  if (val !== null) {
+    document.getElementById('shipTitle').innerHTML = `<span class="tap-hint">tap to edit</span>${val || '[Name]'}`;
+  }
+});
+
+/* ── EXPORT ── */
+document.getElementById('exportBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('exportBtn');
+  const card = document.getElementById('card');
+  btn.textContent = 'Exporting…'; btn.disabled = true;
+  card.classList.add('exporting');
+  btn.style.visibility = 'hidden';
+  await new Promise(r => setTimeout(r, 80));
+  try {
+    // detect low memory devices (Android) and use lower scale
+    const isLowEnd = /android/i.test(navigator.userAgent);
+    const exportScale = isLowEnd ? 2 : 3;
+    const canvas = await html2canvas(card, {
+      scale: exportScale, useCORS: true, allowTaint: true, backgroundColor: null, logging: false,
+      ignoreElements: el => el.classList.contains('export-hide') || el === btn
+    });
+    const dataUrl = canvas.toDataURL('image/png');
+    const newTab = window.open();
+    if (newTab) {
+      newTab.document.write(`<html><body style="margin:0;background:#111;display:flex;flex-direction:column;align-items:center;padding:20px"><img src="${dataUrl}" style="max-width:100%;border-radius:12px"><br><a href="${dataUrl}" download="compatibility-card.png" style="color:white;font-family:sans-serif;font-size:16px;padding:12px 24px;background:#333;border-radius:8px;text-decoration:none;margin-top:12px">⬇ Download PNG</a><p style="color:#888;font-family:sans-serif;font-size:13px;margin-top:10px">On mobile: tap & hold the image → Save to Photos</p></body></html>`);
+      newTab.document.close();
+    } else {
+      const link = document.createElement('a'); link.download = 'compatibility-card.png'; link.href = dataUrl; link.click();
+    }
+  } catch { alert('Export failed. Try again!'); }
+  card.classList.remove('exporting');
+  btn.style.visibility = '';
+  btn.innerHTML = '<i class="ti ti-download"></i> Export as PNG';
+  btn.disabled = false;
+});
+
+/* ── INIT ── */
+buildCircles();
+buildMeters();
+</script>
+</body>
+</html>
