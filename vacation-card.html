@@ -5,10 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vacation Compatibility Card</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: center; padding: 20px; font-family: Georgia, serif; }
+body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: center; padding: 20px; font-family: 'Inter', sans-serif; }
 #card {
   background: white; border-radius: 20px; border: 1.5px solid #f0e0d0;
   padding: 16px 14px 20px; width: 100%; max-width: 480px; height: fit-content;
@@ -53,7 +56,7 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 /* char name */
 .char-name { font-size: 12px; font-weight: 700; color: var(--fg); text-align: center; margin-top: 4px; cursor: default; border-radius: 4px; padding: 1px 4px; min-width: 56px; }
 .char-name.editing-active { outline: 1.5px dashed var(--fg-hint); background: rgba(128,128,128,0.08); cursor: text; }
-.char-name input.name-input { width: 100%; font-size: 12px; font-weight: 700; color: var(--fg); border: none; background: transparent; outline: none; font-family: Georgia, serif; text-align: center; padding: 0; }
+.char-name input.name-input { width: 100%; font-size: 12px; font-weight: 700; color: var(--fg); border: none; background: transparent; outline: none; font-family: 'Inter', sans-serif; text-align: center; padding: 0; }
 
 /* meters */
 .meters { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
@@ -61,7 +64,7 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 .meter-label { font-size: 11px; font-weight: 600; color: var(--fg-sub); text-align: right; flex: 0 0 78px; line-height: 1.2; cursor: default; border-radius: 4px; padding: 1px 2px; }
 .meter-label.right { text-align: left; }
 .meter-label.editing-active { outline: 1.5px dashed var(--fg-hint); background: rgba(128,128,128,0.08); cursor: text; }
-.meter-label input.label-input { width: 100%; font-size: 11px; font-weight: 600; color: var(--fg-sub); border: none; background: transparent; outline: none; font-family: Georgia, serif; text-align: right; padding: 0; }
+.meter-label input.label-input { width: 100%; font-size: 11px; font-weight: 600; color: var(--fg-sub); border: none; background: transparent; outline: none; font-family: 'Inter', sans-serif; text-align: right; padding: 0; }
 .meter-label.right input.label-input { text-align: left; }
 .meter-track { flex: 1; position: relative; height: 20px; display: flex; align-items: center; }
 .meter-line { width: 100%; height: 2px; background: var(--line); border-radius: 2px; position: absolute; }
@@ -141,7 +144,7 @@ const DEFAULT_TRAITS = [
   ["Takes pictures","Lives in the moment"],
   ["Remembers chargers","Borrows yours the whole trip"],
   ["Budget spreadsheet",'"We\'ll figure it out"'],
-];
+]; 
 
 const traits = DEFAULT_TRAITS.map(p => [...p]);
 // positions[rowIndex][personIndex]
