@@ -13,32 +13,30 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: center; padding: 20px; font-family: 'DM Sans', sans-serif; }
 #card {
-  background: white; border-radius: 20px; border: 1.5px solid #f0e0d0;
-  padding: 16px 14px 20px; width: 100%; max-width: 480px; height: fit-content;
+  background: white; border-radius: 20px; border: 1.5px solid #f0e0d0; padding: 16px 14px 20px; width: 100%; max-width: 480px; height: fit-content;
   --fg: #2a2a2a; --fg-sub: #333; --fg-hint: #aaa; --line: #ddd;
   --btn-bg: #2a2a2a; --btn-fg: #ffffff; --hex-border: #ddd; --hex-fg: #333;
 }
 .ship-title { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 14px; color: var(--fg); letter-spacing: -0.3px; cursor: pointer; }
 .ship-title .tap-hint { color: var(--fg-hint); font-weight: 400; font-size: 14px; display: block; }
 .exporting .tap-hint { display: none !important; }
-
-/* circles */
+  
 .circles-row { display: flex; justify-content: center; align-items: flex-start; flex-wrap: nowrap; gap: 10px; margin-bottom: 20px; }
 .avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
 .circle-container { position: relative; cursor: pointer; flex-shrink: 0; }
 .circle-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; }
 .circle-ring { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; border: 3.5px solid #1a1a1a; pointer-events: none; z-index: 10; }
+  
 .upload-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; z-index: 5; pointer-events: none; }
 .upload-hint i { font-size: 26px; color: #bbb; }
 .circle-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 8; border-radius: 50%; }
 
-/* export show/hide */
+
 .export-hide { transition: opacity 0.15s; }
 .exporting .export-hide { visibility: hidden !important; height: 0 !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important; min-height: 0 !important; }
 .export-only { display: none; }
 .exporting .export-only { display: block !important; }
 
-/* color pickers */
 .color-picker-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .color-picker-wrap label { font-size: 10px; color: var(--fg-hint); }
 .color-picker-row { display: flex; align-items: center; gap: 5px; }
@@ -48,17 +46,14 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 .hex-input:focus { border-color: #bbb; }
 .hex-input.invalid { border-color: #f0a0a0; color: #c00; }
 
-/* zoom controls */
 .zoom-controls { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .zoom-controls label { font-size: 9px; color: var(--fg-hint); }
 .zoom-controls input[type=range] { width: 72px; }
 
-/* char name */
 .char-name { font-size: 12px; font-weight: 700; color: var(--fg); text-align: center; margin-top: 4px; cursor: default; border-radius: 4px; padding: 1px 4px; min-width: 56px; }
 .char-name.editing-active { outline: 1.5px dashed var(--fg-hint); background: rgba(128,128,128,0.08); cursor: text; }
 .char-name input.name-input { width: 100%; font-size: 12px; font-weight: 700; color: var(--fg); border: none; background: transparent; outline: none; font-family: 'DM Sans', sans-serif; text-align: center; padding: 0; }
 
-/* meters */
 .meters { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
 .meter-row { display: flex; align-items: center; gap: 6px; }
 .meter-label { font-size: 11px; font-weight: 600; color: var(--fg-sub); text-align: right; flex: 0 0 78px; line-height: 1.2; cursor: default; border-radius: 4px; padding: 1px 2px; }
@@ -72,7 +67,6 @@ body { background: #fff9f5; min-height: 100vh; display: flex; justify-content: c
 .heart-slider:active { cursor: grabbing; }
 .heart-slider svg { width: 20px; height: 20px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.18)); }
 
-/* controls row */
 .meter-hint { text-align: center; font-size: 11px; color: var(--fg-hint); margin-bottom: 8px; font-family: 'DM Sans', sans-serif; }
 .meter-hint button { background: none; border: 1px solid var(--fg-hint); border-radius: 6px; font-size: 11px; color: var(--fg-hint); cursor: pointer; padding: 2px 8px; font-family: 'DM Sans', sans-serif; }
 .meter-hint button:hover { background: rgba(128,128,128,0.15); }
@@ -167,7 +161,6 @@ function heartSVG(color, size=20) {
 
 function isValidHex(val) { return /^#[0-9A-Fa-f]{6}$/.test(val); }
 
-/* ── DRAW CIRCLE ── */
 function drawCircle(pid) {
   const canvas = document.getElementById(`canvas${pid}`);
   if (!canvas) return;
@@ -190,7 +183,6 @@ function drawCircle(pid) {
   ctx.restore();
 }
 
-/* ── CIRCLE SIZE ── */
 function getCircleSize() {
   return [110, 110, 90, 76, 64, 90, 76, 76][numPersons - 1];
 }
@@ -217,7 +209,7 @@ function setCircleSize() {
   });
 }
 
-/* ── BUILD CIRCLES ── */
+
 function buildCircles() {
   const row = document.getElementById('circlesRow');
   row.innerHTML = '';
@@ -239,7 +231,7 @@ function buildCircles() {
       <div class="char-name" id="name${pid}">${p.name}</div>
       <div class="export-only" id="heartBadge${pid}" style="margin-top:2px">
         <svg id="heartSvg${pid}" viewBox="0 0 24 24" width="26" height="26" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="${p.color}" stroke="#1a1a1a" stroke-width="1.5"/>
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="${p.color}" stroke="#1a1a1a" stroke-width="1.5"/>
         </svg>
       </div>
       <div class="color-picker-wrap export-hide">
@@ -274,7 +266,8 @@ function setupCircle(pid) {
       hint.style.display = 'none';
       hint.style.zIndex = '-1';
       const zoomEl = document.getElementById(`zoom${pid}`);
-      if (zoomEl) zoomEl.value = 1;
+      if (zoomEl) { 
+        zoomEl.value = 1};
       drawCircle(pid);
     };
     img.src = URL.createObjectURL(file);
@@ -309,7 +302,6 @@ function setupCircle(pid) {
   document.addEventListener('touchend', () => { p.drag.on = false; });
 }
 
-/* ── COLOR PICKER ── */
 function applyPersonColor(pid, hex) {
   const color = hex.startsWith('#') ? hex : '#' + hex;
   persons[pid].color = color;
@@ -338,11 +330,13 @@ function setupColorPicker(pid) {
   });
   hexEl.addEventListener('blur', e => {
     const val = e.target.value.startsWith('#') ? e.target.value : '#' + e.target.value;
-    if (!isValidHex(val)) { e.target.value = persons[pid].color.toUpperCase(); e.target.classList.remove('invalid'); }
+    if (!isValidHex(val)) { 
+      e.target.value = persons[pid].color.toUpperCase(); 
+      e.target.classList.remove('invalid'); 
+    }
   });
 }
 
-/* ── NAME EDITABLE ── */
 function makeNameEditable(el, defaultName, pid) {
   let tapTimer = null;
   function activate() {
@@ -363,7 +357,9 @@ function makeNameEditable(el, defaultName, pid) {
     input.addEventListener('blur', save);
     input.addEventListener('keydown', e => {
       if (e.key === 'Enter') input.blur();
-      if (e.key === 'Escape') { input.value = persons[pid].name; input.blur(); }
+      if (e.key === 'Escape') { 
+        input.value = persons[pid].name; input.blur(); 
+      }
     });
   }
   el.addEventListener('click', () => {
@@ -373,7 +369,6 @@ function makeNameEditable(el, defaultName, pid) {
   el.addEventListener('dblclick', activate);
 }
 
-/* ── METERS ── */
 function makeLabelEditable(el, rowIndex, side) {
   let tapTimer = null;
   el.addEventListener('click', () => {
@@ -455,7 +450,6 @@ function attachDrag(sliderId, trackId, rowIndex, pid) {
   document.addEventListener('touchend', () => { active = false; });
 }
 
-/* ── ADD / REMOVE ── */
 function updateAddRemoveBtns() {
   const addBtn = document.getElementById('addBtn');
   const removeBtn = document.getElementById('removeBtn');
@@ -489,7 +483,7 @@ document.getElementById('resetBtn').addEventListener('click', () => {
   applyBgColor(document.getElementById('colorBg').value);
 });
 
-/* ── BG COLOR ── */
+
 function hexToRgb(hex) {
   const h = hex.replace('#','');
   return { r: parseInt(h.slice(0,2),16), g: parseInt(h.slice(2,4),16), b: parseInt(h.slice(4,6),16) };
@@ -536,7 +530,6 @@ document.getElementById('shipTitle').addEventListener('click', () => {
   }
 });
 
-/* ── EXPORT ── */
 document.getElementById('exportBtn').addEventListener('click', async () => {
   const btn = document.getElementById('exportBtn');
   const card = document.getElementById('card');
@@ -555,7 +548,11 @@ document.getElementById('exportBtn').addEventListener('click', async () => {
     const dataUrl = canvas.toDataURL('image/png');
     const newTab = window.open();
     if (newTab) {
-      newTab.document.write(`<html><body style="margin:0;background:#111;display:flex;flex-direction:column;align-items:center;padding:20px"><img src="${dataUrl}" style="max-width:100%;border-radius:12px"><br><a href="${dataUrl}" download="compatibility-card.png" style="color:white;font-family:sans-serif;font-size:16px;padding:12px 24px;background:#333;border-radius:8px;text-decoration:none;margin-top:12px">⬇ Download PNG</a><p style="color:#888;font-family:sans-serif;font-size:13px;margin-top:10px">On mobile: tap & hold the image → Save to Photos</p></body></html>`);
+      newTab.document.write(`<html><body style="margin:0;background:#111;display:flex;flex-direction:column;
+      align-items:center;padding:20px"><img src="${dataUrl}" style="max-width:100%;border-radius:12px"><br><a href="${dataUrl}" 
+      download="compatibility-card.png" style="color:white;font-family:sans-serif;font-size:16px;padding:12px 24px;background:#333;
+      border-radius:8px;text-decoration:none;margin-top:12px">⬇ Download PNG</a><p style="color:#888;font-family:sans-serif;
+      font-size:13px;margin-top:10px">On mobile: tap & hold the image → Save to Photos</p></body></html>`);
       newTab.document.close();
     } else {
       const link = document.createElement('a'); link.download = 'compatibility-card.png'; link.href = dataUrl; link.click();
@@ -567,7 +564,6 @@ document.getElementById('exportBtn').addEventListener('click', async () => {
   btn.disabled = false;
 });
 
-/* ── INIT ── */
 buildCircles();
 buildMeters();
 </script>
